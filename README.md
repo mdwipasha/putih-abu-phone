@@ -15,3 +15,24 @@ rojo serve
 ```
 
 For more help, check out [the Rojo documentation](https://rojo.space/docs).
+
+## Phone Framework
+
+The iPhone 5 framework lives in `ReplicatedStorage.Shared.PhoneFramework` after Rojo sync.
+
+Client usage:
+
+```luau
+local PhoneFramework = require(ReplicatedStorage.Shared.PhoneFramework)
+local Phone = PhoneFramework.Start()
+
+Phone:Open()
+Phone:Close()
+Phone:Lock()
+Phone:Unlock()
+Phone:OpenApp("messages")
+Phone:CloseCurrentApp()
+Phone:SendNotification({ Title = "Messages", Body = "New message" })
+```
+
+New apps are independent `ModuleScript`s in `src/shared/PhoneFramework/Apps`. Each app exports `Id`, `Name`, `Icon`, `Order`, and `Create(context)`. The core registers apps automatically and mounts app UI inside the static iPhone 5 screen.
