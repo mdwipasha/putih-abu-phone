@@ -5,7 +5,6 @@ return {
 	Name = "Bank",
 	Icon = { 
 		Background = Color3.fromRGB(35, 117, 190), 
-		Glyph = "$" 
 	},
 	Order = 50,
 	Create = function(context)

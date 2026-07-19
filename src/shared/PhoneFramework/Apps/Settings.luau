@@ -5,7 +5,10 @@ local create = require(script.Parent.Parent.Shared.Utilities.Create)
 local Settings = {
 	Id = "settings",
 	Name = "Settings",
-	Icon = { Background = Color3.fromRGB(174, 174, 174), Glyph = "SET" },
+	Icon = { 
+		Background = Color3.fromRGB(115, 115, 122), 
+		Image = "rbxassetid://129638627110007",
+	},
 	Order = 70,
 }
 
@@ -23,6 +26,7 @@ function Settings.Create(context: any)
 	local root = create("Frame", {
 		Name = "SettingsApp",
 		BackgroundColor3 = Color3.fromRGB(239, 239, 244),
+		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 50,
 	})
@@ -31,6 +35,7 @@ function Settings.Create(context: any)
 	local nav = create("Frame", {
 		Name = "NavigationBar",
 		BackgroundColor3 = Color3.fromRGB(248, 248, 248),
+		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0, Constants.Screen.StatusBarHeight),
 		Size = UDim2.fromScale(1, 0.08),
 		ZIndex = 51,

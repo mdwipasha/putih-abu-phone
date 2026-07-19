@@ -44,6 +44,15 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 		end
 	end
 
+	-- Hitung jumlah halaman berdasarkan jumlah app di grid (bukan dock)
+	local gridAppCount = 0
+	for _, app in ipairs(apps) do
+		if not app.IsSystem and not dockLookup[app.Id] then
+			gridAppCount += 1
+		end
+	end
+	local pageCount = math.max(1, math.ceil(gridAppCount / (4 * 3))) -- 4 kolom x 3 baris per halaman
+
 	local pageDots = create("Frame", {
 		Name = "PageIndicator",
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -53,13 +62,15 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 		ZIndex = 29,
 		Parent = root,
 	})
-	for index = 1, 3 do
+	for index = 1, pageCount do
+		local spacing = if pageCount == 1 then 0.5 else (index - 1) / (pageCount - 1)
+		local xPos = if pageCount == 1 then 0.5 else 0.1 + spacing * 0.8
 		local dot = create("Frame", {
 			Name = "Dot" .. index,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = if index == 1 then 0 else 0.64,
-			Position = UDim2.fromScale(0.2 + (index - 1) * 0.3, 0.5),
+			Position = UDim2.fromScale(xPos, 0.5),
 			Size = UDim2.fromScale(0.14, 0.55),
 			ZIndex = 30,
 			Parent = pageDots,

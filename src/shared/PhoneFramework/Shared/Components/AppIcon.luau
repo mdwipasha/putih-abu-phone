@@ -258,18 +258,21 @@ function AppIcon.new(parent: Instance, app: any, activated: () -> ())
 	})
 	rounded(tile, 0.22)
 
-	create("UIGradient", {
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-			ColorSequenceKeypoint.new(0.45, app.Icon.Background),
-			ColorSequenceKeypoint.new(1, app.Icon.Background:Lerp(Color3.fromRGB(0, 0, 0), 0.18)),
-		}),
-		Rotation = 90,
-		Parent = tile,
-	})
-
 	if not app.Icon.Image then
+		-- Gradient hanya untuk icon tanpa gambar (fallback art)
+		create("UIGradient", {
+			Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+				ColorSequenceKeypoint.new(0.45, app.Icon.Background),
+				ColorSequenceKeypoint.new(1, app.Icon.Background:Lerp(Color3.fromRGB(0, 0, 0), 0.18)),
+			}),
+			Rotation = 90,
+			Parent = tile,
+		})
 		drawFallbackArt(tile, app)
+	else
+		-- Untuk icon dengan gambar: pastikan background transparan agar gambar terlihat jelas
+		tile.BackgroundTransparency = 1
 	end
 
 	local label = create("TextLabel", {

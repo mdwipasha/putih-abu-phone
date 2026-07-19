@@ -5,7 +5,7 @@ return {
 	Name = "Camera",
 	Icon = { 
 		Background = Color3.fromRGB(255, 255, 255),
-		Image = "rbxassetid://6125281128", 
+		Image = "rbxassetid://109293262112242", 
 	},
 	Order = 30,
 	Create = function(context)

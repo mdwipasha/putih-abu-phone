@@ -3,7 +3,10 @@ local SimpleAppView = require(script.Parent.Parent.Shared.Components.SimpleAppVi
 return {
 	Id = "calendar",
 	Name = "Calendar",
-	Icon = { Background = Color3.fromRGB(248, 248, 248), Glyph = "11" },
+	Icon = { 
+		Background = Color3.fromRGB(248, 248, 248), 
+		Image = "rbxassetid://100710392992695",
+	},
 	Order = 20,
 	Create = function(context)
 		return SimpleAppView.new(context, "Calendar", Color3.fromRGB(248, 248, 248))

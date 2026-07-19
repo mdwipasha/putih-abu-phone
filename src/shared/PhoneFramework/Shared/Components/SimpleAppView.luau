@@ -8,6 +8,7 @@ function SimpleAppView.new(context: any, title: string, color: Color3)
 	local root = create("Frame", {
 		Name = title .. "App",
 		BackgroundColor3 = Color3.fromRGB(246, 246, 246),
+		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 50,
 	})
@@ -16,6 +17,7 @@ function SimpleAppView.new(context: any, title: string, color: Color3)
 	local nav = create("Frame", {
 		Name = "NavigationBar",
 		BackgroundColor3 = Color3.fromRGB(248, 248, 248),
+		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0, Constants.Screen.StatusBarHeight),
 		Size = UDim2.fromScale(1, 0.08),
 		ZIndex = 51,

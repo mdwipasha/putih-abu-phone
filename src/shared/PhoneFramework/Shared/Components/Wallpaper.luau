@@ -3,6 +3,8 @@ local create = require(script.Parent.Parent.Utilities.Create)
 
 local Wallpaper = {}
 
+local DEFAULT_WALLPAPER = "rbxassetid://115291664497394"
+
 local function normalizeImageId(value: any): string
 	if type(value) ~= "string" or value == "" then
 		return ""
@@ -20,64 +22,32 @@ end
 function Wallpaper.new(parent: Instance, variant: ("Home" | "Lock")?, context: any?)
 	local root = create("Frame", {
 		Name = (variant or "Home") .. "Wallpaper",
-		BackgroundColor3 = Constants.Screen.WallpaperTop,
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 11,
 		Parent = parent,
 	})
 
-	create("UIGradient", {
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Constants.Screen.WallpaperTop),
-			ColorSequenceKeypoint.new(
-				0.48,
-				if variant == "Lock" then Color3.fromRGB(77, 61, 92) else Constants.Screen.WallpaperMid
-			),
-			ColorSequenceKeypoint.new(
-				0.74,
-				if variant == "Lock" then Color3.fromRGB(165, 139, 141) else Color3.fromRGB(201, 85, 73)
-			),
-			ColorSequenceKeypoint.new(1, Constants.Screen.WallpaperBottom),
-		}),
-		Rotation = 90,
-		Parent = root,
-	})
+	-- Wallpaper image: gunakan custom dari SaveService jika ada, fallback ke default
+	local savedImage = context and context.Services and context.Services.SaveService:Get("WallpaperImage", "") or ""
+	local initialImage = if savedImage ~= "" then normalizeImageId(savedImage) else DEFAULT_WALLPAPER
 
-	for index = 1, 7 do
-		local ridge = create("Frame", {
-			Name = "MountainRidge" .. index,
-			AnchorPoint = Vector2.new(0.5, 1),
-			BackgroundColor3 = if variant == "Lock" then Color3.fromRGB(64, 61, 73) else Color3.fromRGB(12, 54, 72),
-			BackgroundTransparency = 0.08 + index * 0.035,
-			Position = UDim2.fromScale(0.08 + index * 0.14, 0.7 + (index % 3) * 0.055),
-			Rotation = -18 + index * 6,
-			Size = UDim2.fromScale(0.52, 0.14),
-			ZIndex = 12,
-			Parent = root,
-		})
-		create("UICorner", {
-			CornerRadius = UDim.new(0.5, 0),
-			Parent = ridge,
-		})
-	end
-
-	local customImage = create("ImageLabel", {
-		Name = "CustomWallpaper",
+	local wallpaperImg = create("ImageLabel", {
+		Name = "WallpaperImage",
 		BackgroundTransparency = 1,
-		Image = normalizeImageId(
-			context and context.Services and context.Services.SaveService:Get("WallpaperImage", "") or ""
-		),
+		Image = initialImage,
 		ScaleType = Enum.ScaleType.Crop,
 		Size = UDim2.fromScale(1, 1),
-		ZIndex = 18,
+		ZIndex = 12,
 		Parent = root,
 	})
 
 	if context and context.Services and context.Services.SaveService then
 		context.Services.SaveService.Changed:Connect(function(key: string, value: any)
 			if key == "WallpaperImage" then
-				customImage.Image = normalizeImageId(value)
+				local newImage = normalizeImageId(value)
+				wallpaperImg.Image = if newImage ~= "" then newImage else DEFAULT_WALLPAPER
 			end
 		end)
 	end
