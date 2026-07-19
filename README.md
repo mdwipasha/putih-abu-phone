@@ -37,4 +37,4 @@ Phone:SendNotification({ Title = "Messages", Body = "New message" })
 
 New apps are independent `ModuleScript`s in `src/shared/PhoneFramework/Apps`. Each app exports `Id`, `Name`, `Icon`, `Order`, and `Create(context)`. The core registers apps automatically and mounts app UI inside the static iPhone 5 screen.
 
-Use `Icon.Image = "rbxassetid://..."` on an app definition to render a real image icon. The Settings app can set the phone wallpaper at runtime from a Roblox image asset id.
+Use `Icon.Image = "rbxassetid://..."` on an app definition to render a real image icon. Local `.png` or `.ico` files must be imported/uploaded into Roblox first; Roblox UI cannot load a Windows file path directly at runtime. The Settings app can set the phone wallpaper from a Roblox image asset id and accepts either a plain numeric id or `rbxassetid://...`.

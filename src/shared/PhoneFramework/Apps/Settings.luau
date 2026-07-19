@@ -12,6 +12,14 @@ local Settings = {
 function Settings.Create(context: any)
 	local saveService = context.Services.SaveService
 
+	local function applyWallpaper(inputText: string)
+		saveService:Set("WallpaperImage", inputText)
+		context.SendNotification({
+			Title = "Wallpaper",
+			Body = "Wallpaper berhasil diganti.",
+		})
+	end
+
 	local root = create("Frame", {
 		Name = "SettingsApp",
 		BackgroundColor3 = Color3.fromRGB(239, 239, 244),
@@ -27,11 +35,6 @@ function Settings.Create(context: any)
 		Size = UDim2.fromScale(1, 0.08),
 		ZIndex = 51,
 		Parent = root,
-	})
-	create("UIStroke", {
-		Color = Color3.fromRGB(200, 200, 205),
-		Thickness = 1,
-		Parent = nav,
 	})
 
 	local back = create("TextButton", {
@@ -133,7 +136,12 @@ function Settings.Create(context: any)
 		Parent = apply,
 	})
 	apply.Activated:Connect(function()
-		saveService:Set("WallpaperImage", input.Text)
+		applyWallpaper(input.Text)
+	end)
+	input.FocusLost:Connect(function(enterPressed: boolean)
+		if enterPressed then
+			applyWallpaper(input.Text)
+		end
 	end)
 
 	return root

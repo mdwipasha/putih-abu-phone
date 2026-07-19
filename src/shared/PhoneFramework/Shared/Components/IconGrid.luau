@@ -73,8 +73,8 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 	local dock = create("Frame", {
 		Name = "Dock",
 		AnchorPoint = Vector2.new(0, 1),
-		BackgroundColor3 = Color3.fromRGB(238, 238, 238),
-		BackgroundTransparency = 0.52,
+		BackgroundColor3 = Color3.fromRGB(214, 224, 232),
+		BackgroundTransparency = 0.2,
 		Position = UDim2.fromScale(0, 1),
 		Size = UDim2.fromScale(1, Constants.Screen.DockHeight),
 		ZIndex = 26,
@@ -84,15 +84,15 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 		Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 178, 186)),
 		Rotation = 90,
 		Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.25),
-			NumberSequenceKeypoint.new(1, 0.58),
+			NumberSequenceKeypoint.new(0, 0.1),
+			NumberSequenceKeypoint.new(1, 0.2),
 		}),
 		Parent = dock,
 	})
 	create("UIStroke", {
 		Color = Color3.fromRGB(255, 255, 255),
 		Thickness = 1,
-		Transparency = 0.7,
+		Transparency = 0.2,
 		Parent = dock,
 	})
 
@@ -103,8 +103,8 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 				openApp(app.Id)
 			end)
 			icon.AnchorPoint = Vector2.new(0.5, 0.5)
-			icon.Position = UDim2.fromScale(0.14 + (index - 1) * 0.24, 0.54)
-			icon.Size = UDim2.fromScale(0.18, 0.86)
+			icon.Position = UDim2.fromScale(0.14 + (index - 1) * 0.24, 0.65)
+			icon.Size = UDim2.fromScale(0.2, 0.95)
 		end
 	end
 

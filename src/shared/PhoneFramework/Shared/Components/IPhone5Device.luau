@@ -95,17 +95,19 @@ function IPhone5Device.new(parent: Instance)
 		Parent = body,
 	})
 	rounded(innerRim, 0.098)
-	stroke(innerRim, Color3.fromRGB(236, 222, 186), 1, 0.22)	
+	stroke(innerRim, Color3.fromRGB(236, 222, 186), 1, 0.22)
 
 	local screen = create("Frame", {
 		Name = "Screen",
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		ClipsDescendants = true,
 		Position = Constants.Device.ScreenRect.Position,
-		Size = Constants.Device.ScreenRect.Size,	
+		Size = Constants.Device.ScreenRect.Size,
 		ZIndex = 10,
 		Parent = body,
 	})
+	rounded(screen, 0.012)
+	stroke(screen, Color3.fromRGB(24, 24, 26), 2, 0.05)
 	create("UIAspectRatioConstraint", {
 		AspectRatio = Constants.Screen.AspectRatio,
 		DominantAxis = Enum.DominantAxis.Width,
@@ -120,6 +122,7 @@ function IPhone5Device.new(parent: Instance)
 		ZIndex = 11,
 		Parent = screen,
 	})
+	rounded(screenContent, 0.012)
 
 	local screenDimmer = create("Frame", {
 		Name = "ScreenDimmer",
@@ -134,7 +137,7 @@ function IPhone5Device.new(parent: Instance)
 		Name = "FrontCamera",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(15, 17, 22),
-		Position = UDim2.fromScale(0.5, 0.058),
+		Position = UDim2.fromScale(0.5, 0.048),
 		Size = UDim2.fromScale(0.035, 0.016),
 		ZIndex = 5,
 		Parent = body,
@@ -146,7 +149,7 @@ function IPhone5Device.new(parent: Instance)
 		Name = "ProximitySensor",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(31, 32, 36),
-		Position = UDim2.fromScale(0.334, 0.096),
+		Position = UDim2.fromScale(0.334, 0.086),
 		Size = UDim2.fromScale(0.026, 0.012),
 		ZIndex = 5,
 		Parent = body,
@@ -157,7 +160,7 @@ function IPhone5Device.new(parent: Instance)
 		Name = "Speaker",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(26, 27, 30),
-		Position = UDim2.fromScale(0.5, 0.096),
+		Position = UDim2.fromScale(0.5, 0.086),
 		Size = UDim2.fromScale(0.205, 0.012),
 		ZIndex = 5,
 		Parent = body,
@@ -169,13 +172,13 @@ function IPhone5Device.new(parent: Instance)
 		Name = "HomeButtonRing",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(235, 235, 232),
-		Position = UDim2.fromScale(0.5, 0.910),
+		Position = UDim2.fromScale(0.5, 0.920),
 		Size = UDim2.fromScale(0.205, 0.097),
 		ZIndex = 5,
 		Parent = body,
 	})
 	rounded(homeOuter, 1)
-	stroke(homeOuter, Color3.fromRGB(135, 135, 132), 2)
+	stroke(homeOuter, Color3.fromRGB(236, 222, 186), 1, 0.1)
 
 	local homeInner = create("Frame", {
 		Name = "HomeButton",

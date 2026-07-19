@@ -246,10 +246,15 @@ function AppIcon.new(parent: Instance, app: any, activated: () -> ())
 		BackgroundColor3 = app.Icon.Background,
 		Position = UDim2.fromScale(0.5, 0),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = UDim2.fromScale(0.78, 0.62),
+		Size = UDim2.fromScale(0.82, 0.82),
 		Image = app.Icon.Image or "",
 		ZIndex = 31,
 		Parent = button,
+	})
+	create("UIAspectRatioConstraint", {
+		AspectRatio = 1,
+		DominantAxis = Enum.DominantAxis.Width,
+		Parent = tile,
 	})
 	rounded(tile, 0.22)
 
@@ -267,18 +272,23 @@ function AppIcon.new(parent: Instance, app: any, activated: () -> ())
 		drawFallbackArt(tile, app)
 	end
 
-	create("TextLabel", {
+	local label = create("TextLabel", {
 		Name = "Label",
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
 		Text = app.Name,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextScaled = true,
-		TextStrokeTransparency = 0.58,
-		Position = UDim2.fromScale(-0.16, 0.65),
-		Size = UDim2.fromScale(1.32, 0.15),
+		TextStrokeTransparency = 0.8,
+		Position = UDim2.fromScale(-0.16, 0.60),
+		Size = UDim2.fromScale(1.37, 0.17),
 		ZIndex = 31,
 		Parent = button,
+	})
+	create("UITextSizeConstraint", {
+		MinTextSize = 7,
+		MaxTextSize = 14,
+		Parent = label,
 	})
 
 	button.Activated:Connect(activated)

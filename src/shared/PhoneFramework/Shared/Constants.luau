@@ -18,23 +18,23 @@ Constants.Device = {
 	BodyColor = Color3.fromRGB(247, 247, 245),
 	EdgeColor = Color3.fromRGB(198, 174, 128),
 	ScreenRect = {
-		Position = UDim2.fromScale(0.075, 0.138),
-		Size = UDim2.fromScale(0.85, 0.735),
+		Position = UDim2.fromScale(0.07, 0.13),
+		Size = UDim2.fromScale(0.86, 0.75),
 	},
 }
 
 Constants.Screen = {
-	AspectRatio = 370 / 638,
-	StatusBarHeight = 0.035,
+	AspectRatio = 320 / 568,
+	StatusBarHeight = 0.036,
 	WallpaperTop = Color3.fromRGB(24, 22, 46),
 	WallpaperMid = Color3.fromRGB(37, 80, 98),
 	WallpaperBottom = Color3.fromRGB(10, 28, 45),
-	DockHeight = 0.145,
-	IconSize = 0.194,
-	GridLeft = 0.044,
-	GridTop = 0.066,
-	GridXGap = 0.053,
-	GridYGap = 0.056,
+	DockHeight = 0.175,
+	IconSize = 0.2,
+	GridLeft = 0.045,
+	GridTop = 0.065,
+	GridXGap = 0.035,
+	GridYGap = 0.01,
 }
 
 Constants.Animation = {

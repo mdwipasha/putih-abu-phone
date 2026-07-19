@@ -8,6 +8,8 @@ local function normalizeImageId(value: any): string
 		return ""
 	end
 
+	value = string.gsub(value, "%s+", "")
+
 	if string.find(value, "rbxassetid://", 1, true) or string.find(value, "rbxthumb://", 1, true) then
 		return value
 	end

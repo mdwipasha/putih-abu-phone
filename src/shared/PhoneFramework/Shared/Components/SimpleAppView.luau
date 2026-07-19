@@ -21,11 +21,6 @@ function SimpleAppView.new(context: any, title: string, color: Color3)
 		ZIndex = 51,
 		Parent = root,
 	})
-	create("UIStroke", {
-		Color = Color3.fromRGB(202, 202, 202),
-		Thickness = 1,
-		Parent = nav,
-	})
 
 	local back = create("TextButton", {
 		Name = "BackButton",
