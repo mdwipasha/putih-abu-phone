@@ -30,8 +30,8 @@ function LockScreen.Create(context: any)
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextScaled = true,
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.105),
-		Size = UDim2.fromScale(0.72, 0.13),
+		Position = UDim2.fromScale(0.5, 0.07),
+		Size = UDim2.fromScale(0.78, 0.24),
 		ZIndex = 30,
 		Parent = root,
 	})
@@ -44,19 +44,19 @@ function LockScreen.Create(context: any)
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextScaled = true,
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.fromScale(0.5, 0.23),
-		Size = UDim2.fromScale(0.8, 0.042),
+		Position = UDim2.fromScale(0.5, 0.3),
+		Size = UDim2.fromScale(0.82, 0.04),
 		ZIndex = 30,
 		Parent = root,
 	})
 
 	local slider = create("TextButton", {
-		Name = "SlideToUnlock",
+		Name = "ClickToUnlock",
 		AutoButtonColor = false,
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BackgroundTransparency = 0.62,
 		Font = Constants.Fonts.Light,
-		Text = "slide to unlock",
+		Text = "click to unlock",
 		TextColor3 = Color3.fromRGB(225, 225, 225),
 		TextScaled = true,
 		AnchorPoint = Vector2.new(0.5, 1),
@@ -70,37 +70,6 @@ function LockScreen.Create(context: any)
 		Parent = slider,
 	})
 	slider.Activated:Connect(context.Unlock)
-
-	create("TextLabel", {
-		Name = "Chevron",
-		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = ">",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextScaled = true,
-		Position = UDim2.fromScale(0.06, 0.11),
-		Size = UDim2.fromScale(0.16, 0.76),
-		ZIndex = 36,
-		Parent = slider,
-	})
-
-	create("TextButton", {
-		Name = "CameraShortcut",
-		AnchorPoint = Vector2.new(1, 1),
-		AutoButtonColor = true,
-		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "[]",
-		TextColor3 = Color3.fromRGB(220, 220, 220),
-		TextScaled = true,
-		Position = UDim2.fromScale(0.96, 0.975),
-		Size = UDim2.fromScale(0.11, 0.055),
-		ZIndex = 35,
-		Parent = root,
-	}).Activated:Connect(function()
-		context.Unlock()
-		context.OpenApp("camera")
-	end)
 
 	task.spawn(function()
 		while root.Parent do

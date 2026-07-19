@@ -10,11 +10,50 @@ if not remote then
 	remote.Parent = ReplicatedStorage
 end
 
+-- Warna iPhone 5 Gold / Champagne
+local COLOR_BODY       = Color3.fromRGB(212, 190, 150)  -- bodi gold champagne
+local COLOR_EDGE       = Color3.fromRGB(198, 174, 120)  -- trim metal tepi
+local COLOR_SCREEN     = Color3.fromRGB(8, 10, 16)      -- layar hitam
+local COLOR_BEZEL      = Color3.fromRGB(18, 18, 20)     -- bezel hitam
+local COLOR_HOME       = Color3.fromRGB(232, 228, 218)  -- home button silver
+local COLOR_HOME_RING  = Color3.fromRGB(180, 165, 130)  -- ring home button
+local COLOR_CAMERA     = Color3.fromRGB(22, 22, 28)     -- kamera
+local COLOR_FLASH      = Color3.fromRGB(220, 180, 80)   -- led flash
+local COLOR_SPEAKER    = Color3.fromRGB(40, 38, 35)     -- speaker grill
+
+-- Ukuran iPhone 5 (dalam studs, skala ~1:8)
+local PHONE_W = 0.54  -- lebar
+local PHONE_H = 0.07  -- ketebalan
+local PHONE_L = 1.05  -- panjang (tinggi HP)
+
+local function weld(part0: BasePart, part1: BasePart): WeldConstraint
+	local w = Instance.new("WeldConstraint")
+	w.Part0 = part0
+	w.Part1 = part1
+	w.Parent = part1
+	return w
+end
+
+local function makePart(model: Model, name: string, size: Vector3, color: Color3, material: Enum.Material?, offsetCF: CFrame, bodyPart: BasePart): BasePart
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Anchored = false
+	p.CanCollide = false
+	p.Massless = true
+	p.CastShadow = false
+	p.Size = size
+	p.Color = color
+	p.Material = material or Enum.Material.SmoothPlastic
+	p.CFrame = bodyPart.CFrame * offsetCF
+	p.Parent = model
+	weld(bodyPart, p)
+	return p
+end
+
 local function getHand(character: Model): BasePart?
-	local hand = character:FindFirstChild("RightHand")
+	return (character:FindFirstChild("RightHand")
 		or character:FindFirstChild("Right Arm")
-		or character:FindFirstChild("RightLowerArm")
-	return hand :: BasePart?
+		or character:FindFirstChild("RightLowerArm")) :: BasePart?
 end
 
 local function removePhone(character: Model)
@@ -28,54 +67,124 @@ local function addPhone(character: Model)
 	removePhone(character)
 
 	local hand = getHand(character)
-	if not hand then
-		return
-	end
+	if not hand then return end
 
 	local model = Instance.new("Model")
 	model.Name = "VisiblePhone"
 
+	-- ─── BODY UTAMA ──────────────────────────────────────────────
 	local body = Instance.new("Part")
-	body.Name = "Body"
+	body.Name = "PhoneBody"
 	body.Anchored = false
 	body.CanCollide = false
 	body.Massless = true
-	body.Color = Color3.fromRGB(245, 245, 242)
+	body.CastShadow = false
+	body.Color = COLOR_BODY
 	body.Material = Enum.Material.SmoothPlastic
-	body.Size = Vector3.new(0.55, 0.08, 1.08)
-	body.CFrame = hand.CFrame * CFrame.new(0, -0.35, -0.18) * CFrame.Angles(math.rad(86), math.rad(0), math.rad(8))
+	body.Size = Vector3.new(PHONE_W, PHONE_H, PHONE_L)
+	-- Posisi: di atas telapak tangan, layar menghadap ke atas (ke arah wajah player)
+	body.CFrame = hand.CFrame
+		* CFrame.new(0, -0.22, -0.28)
+		* CFrame.Angles(math.rad(35), math.rad(0), math.rad(0))
 	body.Parent = model
-
-	local screen = Instance.new("Part")
-	screen.Name = "Screen"
-	screen.Anchored = false
-	screen.CanCollide = false
-	screen.Massless = true
-	screen.Color = Color3.fromRGB(8, 10, 16)
-	screen.Material = Enum.Material.Glass
-	screen.Size = Vector3.new(0.45, 0.012, 0.72)
-	screen.CFrame = body.CFrame * CFrame.new(0, -0.047, 0)
-	screen.Parent = model
-
-	local weldToHand = Instance.new("WeldConstraint")
-	weldToHand.Part0 = hand
-	weldToHand.Part1 = body
-	weldToHand.Parent = body
-
-	local weldScreen = Instance.new("WeldConstraint")
-	weldScreen.Part0 = body
-	weldScreen.Part1 = screen
-	weldScreen.Parent = screen
-
 	model.PrimaryPart = body
+
+	-- Weld ke tangan
+	local mainWeld = Instance.new("WeldConstraint")
+	mainWeld.Part0 = hand
+	mainWeld.Part1 = body
+	mainWeld.Parent = body
+
+	-- ─── LAYAR (SCREEN) ──────────────────────────────────────────
+	makePart(model, "Screen", Vector3.new(PHONE_W * 0.74, PHONE_H * 0.3, PHONE_L * 0.64),
+		COLOR_SCREEN, Enum.Material.Glass,
+		CFrame.new(0, PHONE_H * 0.65, PHONE_L * 0.02), body)
+
+	-- ─── BEZEL ATAS (area speaker + kamera depan) ────────────────
+	makePart(model, "BezelTop", Vector3.new(PHONE_W * 0.9, PHONE_H * 0.28, PHONE_L * 0.135),
+		COLOR_BEZEL, Enum.Material.SmoothPlastic,
+		CFrame.new(0, PHONE_H * 0.65, PHONE_L * 0.42), body)
+
+	-- ─── BEZEL BAWAH (area home button) ──────────────────────────
+	makePart(model, "BezelBottom", Vector3.new(PHONE_W * 0.9, PHONE_H * 0.28, PHONE_L * 0.135),
+		COLOR_BEZEL, Enum.Material.SmoothPlastic,
+		CFrame.new(0, PHONE_H * 0.65, -PHONE_L * 0.42), body)
+
+	-- ─── SPEAKER GRILL (atas layar) ──────────────────────────────
+	makePart(model, "SpeakerGrill", Vector3.new(PHONE_W * 0.28, PHONE_H * 0.12, PHONE_L * 0.018),
+		COLOR_SPEAKER, Enum.Material.SmoothPlastic,
+		CFrame.new(0, PHONE_H * 0.7, PHONE_L * 0.432), body)
+
+	-- ─── KAMERA DEPAN ────────────────────────────────────────────
+	makePart(model, "FrontCamera", Vector3.new(PHONE_W * 0.06, PHONE_H * 0.12, PHONE_W * 0.06),
+		COLOR_CAMERA, Enum.Material.Glass,
+		CFrame.new(PHONE_W * 0.22, PHONE_H * 0.7, PHONE_L * 0.43), body)
+
+	-- ─── HOME BUTTON RING ─────────────────────────────────────────
+	makePart(model, "HomeButtonRing", Vector3.new(PHONE_W * 0.22, PHONE_H * 0.18, PHONE_W * 0.22),
+		COLOR_HOME_RING, Enum.Material.Metal,
+		CFrame.new(0, PHONE_H * 0.65, -PHONE_L * 0.425), body)
+
+	-- ─── HOME BUTTON ─────────────────────────────────────────────
+	makePart(model, "HomeButton", Vector3.new(PHONE_W * 0.165, PHONE_H * 0.22, PHONE_W * 0.165),
+		COLOR_HOME, Enum.Material.Metal,
+		CFrame.new(0, PHONE_H * 0.67, -PHONE_L * 0.425), body)
+
+	-- ─── BACK BODY (belakang HP, warna emas) ─────────────────────
+	makePart(model, "BackPanel", Vector3.new(PHONE_W * 0.88, PHONE_H * 0.1, PHONE_L * 0.7),
+		COLOR_BODY, Enum.Material.SmoothPlastic,
+		CFrame.new(0, -PHONE_H * 0.55, 0), body)
+
+	-- ─── KAMERA BELAKANG ─────────────────────────────────────────
+	makePart(model, "RearCamera", Vector3.new(PHONE_W * 0.1, PHONE_H * 0.28, PHONE_W * 0.1),
+		COLOR_CAMERA, Enum.Material.Glass,
+		CFrame.new(-PHONE_W * 0.26, -PHONE_H * 0.62, PHONE_L * 0.37), body)
+
+	-- ─── LED FLASH ───────────────────────────────────────────────
+	makePart(model, "Flash", Vector3.new(PHONE_W * 0.065, PHONE_H * 0.22, PHONE_W * 0.065),
+		COLOR_FLASH, Enum.Material.Neon,
+		CFrame.new(-PHONE_W * 0.26, -PHONE_H * 0.62, PHONE_L * 0.29), body)
+
+	-- ─── TRIM TEPI KIRI ──────────────────────────────────────────
+	makePart(model, "EdgeLeft", Vector3.new(PHONE_H * 0.35, PHONE_H * 1.05, PHONE_L * 0.96),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(-PHONE_W * 0.535, 0, 0), body)
+
+	-- ─── TRIM TEPI KANAN ─────────────────────────────────────────
+	makePart(model, "EdgeRight", Vector3.new(PHONE_H * 0.35, PHONE_H * 1.05, PHONE_L * 0.96),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(PHONE_W * 0.535, 0, 0), body)
+
+	-- ─── TRIM TEPI ATAS ──────────────────────────────────────────
+	makePart(model, "EdgeTop", Vector3.new(PHONE_W * 1.08, PHONE_H * 1.05, PHONE_H * 0.35),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(0, 0, PHONE_L * 0.51), body)
+
+	-- ─── TRIM TEPI BAWAH ─────────────────────────────────────────
+	makePart(model, "EdgeBottom", Vector3.new(PHONE_W * 1.08, PHONE_H * 1.05, PHONE_H * 0.35),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(0, 0, -PHONE_L * 0.51), body)
+
+	-- ─── TOMBOL VOLUME (kiri atas & bawah) ───────────────────────
+	makePart(model, "VolUp", Vector3.new(PHONE_H * 0.25, PHONE_H * 0.32, PHONE_L * 0.1),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(-PHONE_W * 0.555, 0, PHONE_L * 0.2), body)
+
+	makePart(model, "VolDown", Vector3.new(PHONE_H * 0.25, PHONE_H * 0.32, PHONE_L * 0.1),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(-PHONE_W * 0.555, 0, PHONE_L * 0.07), body)
+
+	-- ─── TOMBOL POWER (kanan atas) ───────────────────────────────
+	makePart(model, "PowerButton", Vector3.new(PHONE_H * 0.25, PHONE_H * 0.32, PHONE_L * 0.1),
+		COLOR_EDGE, Enum.Material.Metal,
+		CFrame.new(PHONE_W * 0.555, 0, PHONE_L * 0.32), body)
+
 	model.Parent = character
 end
 
 remote.OnServerEvent:Connect(function(player: Player, action: string, value: any)
 	local character = player.Character
-	if not character then
-		return
-	end
+	if not character then return end
 
 	if action == "SetHolding" then
 		if value == true then

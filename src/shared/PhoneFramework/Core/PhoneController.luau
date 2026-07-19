@@ -7,6 +7,7 @@ local AnimationController = require(script.Parent.AnimationController)
 local AppManager = require(script.Parent.AppManager)
 local NotificationManager = require(script.Parent.NotificationManager)
 local InputManager = require(script.Parent.InputManager)
+local PlayerArmAnimation = require(script.Parent.PlayerArmAnimation)
 local CameraService = require(script.Parent.Parent.Services.CameraService)
 local AudioService = require(script.Parent.Parent.Services.AudioService)
 local SaveService = require(script.Parent.Parent.Services.SaveService)
@@ -33,6 +34,7 @@ function PhoneController.new()
 		_gui = gui,
 		_device = device,
 		_animator = animator,
+		_armAnim = PlayerArmAnimation.new(),
 		_opened = false,
 		_locked = true,
 		_remote = ReplicatedStorage:WaitForChild(Constants.RemoteName, 10),
@@ -105,6 +107,14 @@ function PhoneController:Open()
 	self._appManager:Open("lock")
 	self:_setHolding(true)
 	self._animator:Open()
+	-- Animasi tangan memegang HP
+	local character = self._player.Character
+	if character then
+		self._armAnim:PlayHold(character)
+	end
+	if self._inputManager then
+		self._inputManager:SetButtonVisualState(true)
+	end
 end
 
 function PhoneController:Close()
@@ -119,12 +129,23 @@ function PhoneController:Close()
 		self._appManager:Open("lock")
 	end)
 	self:_setHolding(false)
+	-- Animasi masukkan HP ke kantong
+	local character = self._player.Character
+	if character then
+		self._armAnim:PlayPocket(character)
+	end
+	if self._inputManager then
+		self._inputManager:SetButtonVisualState(false)
+	end
 end
 
 function PhoneController:Lock()
 	self._locked = true
 	self._appManager:Open("lock")
 	self._animator:FadeScreen(1)
+	if self._inputManager then
+		self._inputManager:SetButtonVisualState(false)
+	end
 end
 
 function PhoneController:Unlock()
@@ -134,6 +155,9 @@ function PhoneController:Unlock()
 
 	self._locked = false
 	self._appManager:Open("home")
+	if self._inputManager then
+		self._inputManager:SetButtonVisualState(true)
+	end
 end
 
 function PhoneController:OpenApp(appId: string)
