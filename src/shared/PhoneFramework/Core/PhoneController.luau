@@ -1,16 +1,17 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Constants = require(script.Parent.Parent.Shared.Constants)
-local IPhone5Device = require(script.Parent.Parent.Shared.Components.IPhone5Device)
-local AnimationController = require(script.Parent.AnimationController)
-local AppManager = require(script.Parent.AppManager)
-local NotificationManager = require(script.Parent.NotificationManager)
-local InputManager = require(script.Parent.InputManager)
-local PlayerArmAnimation = require(script.Parent.PlayerArmAnimation)
-local CameraService = require(script.Parent.Parent.Services.CameraService)
-local AudioService = require(script.Parent.Parent.Services.AudioService)
-local SaveService = require(script.Parent.Parent.Services.SaveService)
+local root = script.Parent.Parent
+local Constants = require(root:WaitForChild("Shared"):WaitForChild("Constants"))
+local IPhone5Device = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("IPhone5Device"))
+local AnimationController = require(script.Parent:WaitForChild("AnimationController"))
+local AppManager = require(script.Parent:WaitForChild("AppManager"))
+local NotificationManager = require(script.Parent:WaitForChild("NotificationManager"))
+local InputManager = require(script.Parent:WaitForChild("InputManager"))
+local PlayerArmAnimation = require(script.Parent:WaitForChild("PlayerArmAnimation"))
+local CameraService = require(root:WaitForChild("Services"):WaitForChild("CameraService"))
+local AudioService = require(root:WaitForChild("Services"):WaitForChild("AudioService"))
+local SaveService = require(root:WaitForChild("Services"):WaitForChild("SaveService"))
 
 local PhoneController = {}
 PhoneController.__index = PhoneController
@@ -71,7 +72,7 @@ function PhoneController.new()
 
 	self._appManager = AppManager.new(context, device.ScreenContent, animator)
 	self._notifications = NotificationManager.new(device.ScreenContent)
-	self._appManager:RegisterFolder(script.Parent.Parent.Apps)
+	self._appManager:RegisterFolder(script.Parent.Parent:WaitForChild("Apps"))
 	self._inputManager = InputManager.new(self)
 	self._appManager:Open("lock")
 

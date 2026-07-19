@@ -47,7 +47,7 @@ function Settings.Create(context: any)
 		AutoButtonColor = true,
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
-		Text = "<",
+		Text = "く",
 		TextColor3 = Color3.fromRGB(0, 122, 255),
 		TextScaled = true,
 		Position = UDim2.fromScale(0.02, 0.15),

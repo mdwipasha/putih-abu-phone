@@ -1,8 +1,8 @@
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local Constants = require(script.Parent.Parent.Shared.Constants)
-local create = require(script.Parent.Parent.Shared.Utilities.Create)
+local Constants = require(script.Parent.Parent:WaitForChild("Shared"):WaitForChild("Constants"))
+local create = require(script.Parent.Parent:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
 
 local InputManager = {}
 InputManager.__index = InputManager
@@ -123,7 +123,7 @@ function InputManager:CreateMobileToggleButton(phone: any)
 	table.insert(self._connections, mobileGui)
 end
 
-function InputManager:SetButtonVisualState(opened: boolean)
+function InputManager:SetButtonVisualState(opened)
 	if not self._toggleButton then return end
 
 	local targetPosition

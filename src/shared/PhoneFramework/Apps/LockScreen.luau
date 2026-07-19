@@ -1,7 +1,8 @@
-local Constants = require(script.Parent.Parent.Shared.Constants)
-local StatusBar = require(script.Parent.Parent.Shared.Components.StatusBar)
-local Wallpaper = require(script.Parent.Parent.Shared.Components.Wallpaper)
-local create = require(script.Parent.Parent.Shared.Utilities.Create)
+local root = script.Parent.Parent
+local Constants = require(root:WaitForChild("Shared"):WaitForChild("Constants"))
+local StatusBar = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("StatusBar"))
+local Wallpaper = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("Wallpaper"))
+local create = require(root:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
 
 local LockScreen = {
 	Id = "lock",

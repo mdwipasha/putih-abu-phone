@@ -1,4 +1,4 @@
-local PhoneController = require(script.Core.PhoneController)
+local PhoneController = require(script:WaitForChild("Core"):WaitForChild("PhoneController"))
 
 local PhoneFramework = {}
 PhoneFramework.__index = PhoneFramework

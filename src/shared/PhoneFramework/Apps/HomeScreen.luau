@@ -1,7 +1,8 @@
-local StatusBar = require(script.Parent.Parent.Shared.Components.StatusBar)
-local Wallpaper = require(script.Parent.Parent.Shared.Components.Wallpaper)
-local IconGrid = require(script.Parent.Parent.Shared.Components.IconGrid)
-local create = require(script.Parent.Parent.Shared.Utilities.Create)
+local root = script.Parent.Parent
+local StatusBar = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("StatusBar"))
+local Wallpaper = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("Wallpaper"))
+local IconGrid = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("IconGrid"))
+local create = require(root:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
 
 local HomeScreen = {
 	Id = "home",

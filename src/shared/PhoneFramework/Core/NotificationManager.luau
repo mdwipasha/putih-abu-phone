@@ -1,4 +1,4 @@
-local create = require(script.Parent.Parent.Shared.Utilities.Create)
+local create = require(script.Parent.Parent:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
 
 local NotificationManager = {}
 NotificationManager.__index = NotificationManager

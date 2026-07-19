@@ -36,7 +36,7 @@ function PlayerArmAnimation.new()
 	return self
 end
 
-function PlayerArmAnimation:_getMotor(character: Model): Motor6D?
+function PlayerArmAnimation:_getMotor(character)
 	-- R6: Motor6D ada di Torso dengan nama "Right Shoulder"
 	local torso = character:FindFirstChild("Torso")
 	if torso then
@@ -66,7 +66,7 @@ function PlayerArmAnimation:_cancelAll()
 	table.clear(self._activeTweens)
 end
 
-function PlayerArmAnimation:_tweenMotor(motor: Motor6D, targetCF: CFrame, tweenInfo: TweenInfo, onComplete: (() -> ())?)
+function PlayerArmAnimation:_tweenMotor(motor, targetCF, tweenInfo, onComplete)
 	self:_cancelAll()
 	local tween = TweenService:Create(motor, tweenInfo, { Transform = targetCF })
 	table.insert(self._activeTweens, tween)
@@ -77,7 +77,7 @@ function PlayerArmAnimation:_tweenMotor(motor: Motor6D, targetCF: CFrame, tweenI
 end
 
 -- Animasi memegang HP: tangan naik ke depan wajah
-function PlayerArmAnimation:PlayHold(character: Model)
+function PlayerArmAnimation:PlayHold(character)
 	if self._currentPose == "hold" then return end
 	self._currentPose = "hold"
 
@@ -88,7 +88,7 @@ function PlayerArmAnimation:PlayHold(character: Model)
 end
 
 -- Animasi tutup HP: tangan ke kantong, lalu balik idle
-function PlayerArmAnimation:PlayPocket(character: Model)
+function PlayerArmAnimation:PlayPocket(character)
 	if self._currentPose == "idle" then return end
 	self._currentPose = "idle"
 
@@ -107,7 +107,7 @@ function PlayerArmAnimation:PlayPocket(character: Model)
 end
 
 -- Reset paksa ke idle (misal saat respawn)
-function PlayerArmAnimation:Reset(character: Model)
+function PlayerArmAnimation:Reset(character)
 	self._currentPose = "idle"
 	local motor = self:_getMotor(character)
 	if motor then

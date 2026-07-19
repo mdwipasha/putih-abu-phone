@@ -1,6 +1,6 @@
 local TweenService = game:GetService("TweenService")
 
-local Constants = require(script.Parent.Parent.Shared.Constants)
+local Constants = require(script.Parent.Parent:WaitForChild("Shared"):WaitForChild("Constants"))
 
 local AnimationController = {}
 AnimationController.__index = AnimationController
