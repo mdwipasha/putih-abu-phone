@@ -19,7 +19,7 @@ function HomeScreen.Create(context: any)
 		ZIndex = 20,
 	})
 
-	Wallpaper.new(root, "Home")
+	Wallpaper.new(root, "Home", context)
 	StatusBar.new(root, { Light = true, Carrier = "ROBLOX", Battery = "100%" })
 	IconGrid.new(root, context.GetApps(), context.OpenApp, { "phone", "contacts", "gallery", "music" })
 

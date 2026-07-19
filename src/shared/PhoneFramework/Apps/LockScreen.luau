@@ -19,7 +19,7 @@ function LockScreen.Create(context: any)
 		ZIndex = 20,
 	})
 
-	Wallpaper.new(root, "Lock")
+	Wallpaper.new(root, "Lock", context)
 	StatusBar.new(root, { Light = true, Carrier = "", Battery = "100%" })
 
 	local timeText = create("TextLabel", {

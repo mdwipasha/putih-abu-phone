@@ -91,10 +91,12 @@ function AnimationController:Close(onComplete: (() -> ())?)
 end
 
 function AnimationController:SwapIn(instance: GuiObject)
-	instance.Position = UDim2.fromScale(1, 0)
+	local finalTransparency = instance.BackgroundTransparency
+	instance.Position = UDim2.fromScale(0, 0)
+	instance.BackgroundTransparency = math.min(finalTransparency + 0.08, 1)
 	instance.Parent = self._device.ScreenContent
-	self:_play(instance, TweenInfo.new(Constants.Animation.AppTime, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-		Position = UDim2.fromScale(0, 0),
+	self:_play(instance, TweenInfo.new(Constants.Animation.AppTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		BackgroundTransparency = finalTransparency,
 	})
 end
 

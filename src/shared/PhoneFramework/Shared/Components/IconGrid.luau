@@ -73,16 +73,26 @@ function IconGrid.new(parent: Instance, apps: { any }, openApp: (string) -> (), 
 	local dock = create("Frame", {
 		Name = "Dock",
 		AnchorPoint = Vector2.new(0, 1),
-		BackgroundColor3 = Color3.fromRGB(140, 204, 226),
-		BackgroundTransparency = 0.1,
+		BackgroundColor3 = Color3.fromRGB(238, 238, 238),
+		BackgroundTransparency = 0.52,
 		Position = UDim2.fromScale(0, 1),
 		Size = UDim2.fromScale(1, Constants.Screen.DockHeight),
 		ZIndex = 26,
 		Parent = root,
 	})
 	create("UIGradient", {
-		Color = ColorSequence.new(Color3.fromRGB(155, 224, 244), Color3.fromRGB(65, 143, 182)),
+		Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 178, 186)),
 		Rotation = 90,
+		Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.25),
+			NumberSequenceKeypoint.new(1, 0.58),
+		}),
+		Parent = dock,
+	})
+	create("UIStroke", {
+		Color = Color3.fromRGB(255, 255, 255),
+		Thickness = 1,
+		Transparency = 0.7,
 		Parent = dock,
 	})
 

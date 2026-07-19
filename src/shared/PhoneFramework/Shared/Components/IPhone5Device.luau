@@ -64,6 +64,15 @@ function IPhone5Device.new(parent: Instance)
 	})
 	rounded(body, 0.115)
 	stroke(body, Constants.Device.EdgeColor, 2)
+	create("UIGradient", {
+		Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+			ColorSequenceKeypoint.new(0.43, Constants.Device.BodyColor),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(224, 224, 220)),
+		}),
+		Rotation = 90,
+		Parent = body,
+	})
 
 	local glassInset = create("Frame", {
 		Name = "GlassInset",
@@ -77,12 +86,23 @@ function IPhone5Device.new(parent: Instance)
 	rounded(glassInset, 0.105)
 	stroke(glassInset, Color3.fromRGB(215, 215, 212), 1, 0.5)
 
+	local innerRim = create("Frame", {
+		Name = "InnerMetalRim",
+		BackgroundTransparency = 1,
+		Position = UDim2.fromScale(0.027, 0.018),
+		Size = UDim2.fromScale(0.946, 0.964),
+		ZIndex = 4,
+		Parent = body,
+	})
+	rounded(innerRim, 0.098)
+	stroke(innerRim, Color3.fromRGB(236, 222, 186), 1, 0.22)	
+
 	local screen = create("Frame", {
 		Name = "Screen",
 		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		ClipsDescendants = true,
 		Position = Constants.Device.ScreenRect.Position,
-		Size = Constants.Device.ScreenRect.Size,
+		Size = Constants.Device.ScreenRect.Size,	
 		ZIndex = 10,
 		Parent = body,
 	})
@@ -114,19 +134,20 @@ function IPhone5Device.new(parent: Instance)
 		Name = "FrontCamera",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(15, 17, 22),
-		Position = UDim2.fromScale(0.5, 0.055),
-		Size = UDim2.fromScale(0.039, 0.017),
+		Position = UDim2.fromScale(0.5, 0.058),
+		Size = UDim2.fromScale(0.035, 0.016),
 		ZIndex = 5,
 		Parent = body,
 	})
 	rounded(camera, 1)
+	stroke(camera, Color3.fromRGB(80, 97, 116), 1, 0.3)
 
 	local sensor = create("Frame", {
 		Name = "ProximitySensor",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(31, 32, 36),
-		Position = UDim2.fromScale(0.33	, 0.096),
-		Size = UDim2.fromScale(0.033, 0.014),
+		Position = UDim2.fromScale(0.334, 0.096),
+		Size = UDim2.fromScale(0.026, 0.012),
 		ZIndex = 5,
 		Parent = body,
 	})
@@ -137,12 +158,12 @@ function IPhone5Device.new(parent: Instance)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(26, 27, 30),
 		Position = UDim2.fromScale(0.5, 0.096),
-		Size = UDim2.fromScale(0.220, 0.011),
+		Size = UDim2.fromScale(0.205, 0.012),
 		ZIndex = 5,
 		Parent = body,
 	})
 	rounded(speaker, 1)
-	stroke(speaker, Color3.fromRGB(180, 180, 177), 1, 0.35)
+	stroke(speaker, Color3.fromRGB(165, 165, 160), 1, 0.2)
 
 	local homeOuter = create("Frame", {
 		Name = "HomeButtonRing",
@@ -189,17 +210,6 @@ function IPhone5Device.new(parent: Instance)
 		})
 		rounded(volumeButton, 0.2)
 	end
-
-	local powerButton = create("Frame", {
-		Name = "PowerButton",
-		AnchorPoint = Vector2.new(0.5, 1),
-		BackgroundColor3 = Color3.fromRGB(205, 205, 202),
-		Position = UDim2.fromScale(0.5, 0.004),
-		Size = UDim2.fromScale(0.2, 0.014),
-		ZIndex = 1,
-		Parent = root,
-	})
-	rounded(powerButton, 0.35)
 
 	return {
 		Root = root,

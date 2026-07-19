@@ -3,7 +3,19 @@ local create = require(script.Parent.Parent.Utilities.Create)
 
 local Wallpaper = {}
 
-function Wallpaper.new(parent: Instance, variant: ("Home" | "Lock")?)
+local function normalizeImageId(value: any): string
+	if type(value) ~= "string" or value == "" then
+		return ""
+	end
+
+	if string.find(value, "rbxassetid://", 1, true) or string.find(value, "rbxthumb://", 1, true) then
+		return value
+	end
+
+	return "rbxassetid://" .. value
+end
+
+function Wallpaper.new(parent: Instance, variant: ("Home" | "Lock")?, context: any?)
 	local root = create("Frame", {
 		Name = (variant or "Home") .. "Wallpaper",
 		BackgroundColor3 = Constants.Screen.WallpaperTop,
@@ -46,6 +58,26 @@ function Wallpaper.new(parent: Instance, variant: ("Home" | "Lock")?)
 			CornerRadius = UDim.new(0.5, 0),
 			Parent = ridge,
 		})
+	end
+
+	local customImage = create("ImageLabel", {
+		Name = "CustomWallpaper",
+		BackgroundTransparency = 1,
+		Image = normalizeImageId(
+			context and context.Services and context.Services.SaveService:Get("WallpaperImage", "") or ""
+		),
+		ScaleType = Enum.ScaleType.Crop,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 18,
+		Parent = root,
+	})
+
+	if context and context.Services and context.Services.SaveService then
+		context.Services.SaveService.Changed:Connect(function(key: string, value: any)
+			if key == "WallpaperImage" then
+				customImage.Image = normalizeImageId(value)
+			end
+		end)
 	end
 
 	return root
