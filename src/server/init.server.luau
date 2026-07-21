@@ -192,6 +192,73 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 		else
 			removePhone(character)
 		end
+
+	elseif action == "PlayMusic" then
+		-- value = { soundId = "...", rollOffMin = 40, rollOffMax = 80 }
+		-- Hapus Part musik lama jika ada
+		local oldPart = character:FindFirstChild("MusicSoundPart")
+		if oldPart then oldPart:Destroy() end
+
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		if not rootPart then return end
+
+		local part = Instance.new("Part")
+		part.Name        = "MusicSoundPart"
+		part.Anchored    = false
+		part.CanCollide  = false
+		part.Massless    = true
+		part.Transparency = 1
+		part.Size        = Vector3.new(0.1, 0.1, 0.1)
+		part.CFrame      = rootPart.CFrame
+		part.Parent      = character  -- di dalam character agar replicate & ikut karakter
+
+		local wc = Instance.new("WeldConstraint")
+		wc.Part0   = part
+		wc.Part1   = rootPart
+		wc.Parent  = part
+
+		local s = Instance.new("Sound")
+		s.Name                = "MusicSound"
+		s.SoundId             = value.soundId
+		s.Volume              = value.volume or 1
+		s.Looped              = value.looped or false
+		s.RollOffMinDistance  = value.rollOffMin or 40
+		s.RollOffMaxDistance  = value.rollOffMax or 80
+		s.RollOffMode         = Enum.RollOffMode.LinearSquare
+		s.Parent              = part
+		s:Play()
+		-- Seek ke posisi yang diminta (untuk scrubbing)
+		if value.timePosition and value.timePosition > 0 then
+			task.defer(function()
+				s.TimePosition = value.timePosition
+			end)
+		end
+
+	elseif action == "StopMusic" then
+		local oldPart = character:FindFirstChild("MusicSoundPart")
+		if oldPart then oldPart:Destroy() end
+
+	elseif action == "PauseMusic" then
+		local oldPart = character:FindFirstChild("MusicSoundPart")
+		if oldPart then
+			local s = oldPart:FindFirstChild("MusicSound")
+			if s then s:Pause() end
+		end
+
+	elseif action == "ResumeMusic" then
+		local oldPart = character:FindFirstChild("MusicSoundPart")
+		if oldPart then
+			local s = oldPart:FindFirstChild("MusicSound")
+			if s then s:Resume() end
+		end
+
+	elseif action == "SetMusicVolume" then
+		-- value = number (0-1)
+		local oldPart = character:FindFirstChild("MusicSoundPart")
+		if oldPart then
+			local s = oldPart:FindFirstChild("MusicSound")
+			if s then s.Volume = math.clamp(value or 1, 0, 1) end
+		end
 	end
 end)
 
