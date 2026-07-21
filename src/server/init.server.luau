@@ -220,12 +220,20 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 		local s = Instance.new("Sound")
 		s.Name                = "MusicSound"
 		s.SoundId             = value.soundId
-		s.Volume              = value.volume or 1
+		s.Volume              = value.volume or 0.25
 		s.Looped              = value.looped or false
 		s.RollOffMinDistance  = value.rollOffMin or 40
 		s.RollOffMaxDistance  = value.rollOffMax or 80
 		s.RollOffMode         = Enum.RollOffMode.LinearSquare
 		s.Parent              = part
+		
+		-- Equalizer untuk melembutkan suara (mengurangi harsh treble/nusuk)
+		local eq = Instance.new("EqualizerSoundEffect")
+		eq.HighGain = -6 -- Cut treble tajam
+		eq.MidGain = 0
+		eq.LowGain = 3   -- Tambah sedikit bass agar lebih bulat
+		eq.Parent = s
+
 		s:Play()
 		-- Seek ke posisi yang diminta (untuk scrubbing)
 		if value.timePosition and value.timePosition > 0 then

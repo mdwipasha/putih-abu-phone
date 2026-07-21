@@ -67,29 +67,16 @@ function LockScreen.Create(context: any)
 	local musicWidget = create("Frame", {
 		Name = "MusicWidget",
 		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-		BackgroundTransparency = 0.25,
+		BackgroundColor3 = Color3.fromRGB(250, 250, 250),
+		BackgroundTransparency = 0.15,
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.38),
-		Size = UDim2.fromScale(0.86, 0.28),
+		Size = UDim2.fromScale(0.9, 0.3),
 		ZIndex = 32,
 		Visible = false,
 		Parent = screenRoot,
 	})
 	create("UICorner", { CornerRadius = UDim.new(0.07, 0), Parent = musicWidget })
-
-	-- Blur effect via gradient overlay
-	local blurGrad = Instance.new("UIGradient")
-	blurGrad.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1,   Color3.fromRGB(200, 200, 200)),
-	})
-	blurGrad.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.3),
-		NumberSequenceKeypoint.new(1, 0.45),
-	})
-	blurGrad.Rotation = 135
-	blurGrad.Parent = musicWidget
 
 	-- ── Cover art kecil (kiri) ────────────────────────────────────────────
 	local coverFrame = create("Frame", {
@@ -98,11 +85,11 @@ function LockScreen.Create(context: any)
 		BackgroundColor3 = Color3.fromRGB(80, 40, 80),
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.04, 0.25),
-		Size = UDim2.fromScale(0.18, 0),
+		Size = UDim2.fromScale(0.18, 0.18),
+		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		ZIndex = 33,
 		Parent = musicWidget,
 	})
-	create("UIAspectRatioConstraint", { AspectRatio = 1, Parent = coverFrame })
 	create("UICorner", { CornerRadius = UDim.new(0.12, 0), Parent = coverFrame })
 
 	local coverImg = create("ImageLabel", {
@@ -120,7 +107,7 @@ function LockScreen.Create(context: any)
 		Name = "NoteLabel",
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
-		Text = "♫",
+		Text = "🎵",
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextTransparency = 0.2,
 		TextScaled = true,
@@ -137,12 +124,12 @@ function LockScreen.Create(context: any)
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Semibold,
 		Text = "Not Playing",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextColor3 = Color3.fromRGB(0, 0, 0),
 		TextScaled = false,
-		TextSize = 11,
+		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
-		Position = UDim2.fromScale(0.26, 0.09),
+		Position = UDim2.fromScale(0.26, 0.095),
 		Size = UDim2.fromScale(0.7, 0.2),
 		ZIndex = 33,
 		Parent = musicWidget,
@@ -155,10 +142,10 @@ function LockScreen.Create(context: any)
 		Text = "",
 		TextColor3 = Color3.fromRGB(252, 60, 92),
 		TextScaled = false,
-		TextSize = 9,
+		TextSize = 10,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
-		Position = UDim2.fromScale(0.26, 0.31),
+		Position = UDim2.fromScale(0.26, 0.25),
 		Size = UDim2.fromScale(0.7, 0.16),
 		ZIndex = 33,
 		Parent = musicWidget,
@@ -170,11 +157,11 @@ function LockScreen.Create(context: any)
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
 		Text = "0:00",
-		TextColor3 = Color3.fromRGB(200, 200, 200),
+		TextColor3 = Color3.fromRGB(142, 142, 147),
 		TextScaled = false,
-		TextSize = 8,
+		TextSize = 9,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.fromScale(0.04, 0.5),
+		Position = UDim2.fromScale(0.04, 0.42),
 		Size = UDim2.fromScale(0.15, 0.12),
 		ZIndex = 33,
 		Parent = musicWidget,
@@ -185,12 +172,12 @@ function LockScreen.Create(context: any)
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
 		Text = "-0:00",
-		TextColor3 = Color3.fromRGB(200, 200, 200),
+		TextColor3 = Color3.fromRGB(142, 142, 147),
 		TextScaled = false,
-		TextSize = 8,
+		TextSize = 9,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.fromScale(0.96, 0.5),
+		Position = UDim2.fromScale(0.96, 0.42),
 		Size = UDim2.fromScale(0.15, 0.12),
 		ZIndex = 33,
 		Parent = musicWidget,
@@ -198,11 +185,11 @@ function LockScreen.Create(context: any)
 
 	local progressBg = create("Frame", {
 		Name = "ProgressBg",
-		BackgroundColor3 = Color3.fromRGB(100, 100, 110),
+		BackgroundColor3 = Color3.fromRGB(220, 220, 225),
 		BorderSizePixel = 0,
 		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.fromScale(0.04, 0.625),
-		Size = UDim2.fromScale(0.92, 0.055),
+		Position = UDim2.fromScale(0.04, 0.595),
+		Size = UDim2.fromScale(0.92, 0.05),
 		ZIndex = 33,
 		Parent = musicWidget,
 	})
@@ -210,7 +197,7 @@ function LockScreen.Create(context: any)
 
 	local progressFill = create("Frame", {
 		Name = "ProgressFill",
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundColor3 = Color3.fromRGB(40, 40, 40),
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(0, 1),
 		ZIndex = 34,
@@ -222,64 +209,57 @@ function LockScreen.Create(context: any)
 	local thumb = create("Frame", {
 		Name = "Thumb",
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundColor3 = Color3.fromRGB(40, 40, 40),
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0, 0.5),
-		Size = UDim2.fromOffset(7, 7),
+		Size = UDim2.fromOffset(8, 8),
 		ZIndex = 35,
 		Parent = progressBg,
 	})
 	create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = thumb })
 
-	-- ── Kontrol Playback ──────────────────────────────────────────────────
 	local controlsRow = create("Frame", {
 		Name = "Controls",
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.fromScale(0.5, 0.97),
-		Size = UDim2.fromScale(0.55, 0.28),
+		Position = UDim2.fromScale(0.5, 0.98),
+		Size = UDim2.fromScale(0.65, 0.28),
 		ZIndex = 33,
 		Parent = musicWidget,
 	})
 
-	local prevBtn = create("TextButton", {
+	local prevBtn = create("ImageButton", {
 		Name = "PrevBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⏮",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextScaled = true,
+		Image = "rbxassetid://106280938766613", -- custom skip previous icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.1, 0.5),
-		Size = UDim2.fromScale(0.28, 0.9),
+		Position = UDim2.fromScale(0.1, 0.4),
+		Size = UDim2.fromScale(0.15, 0.5),
 		ZIndex = 34,
 		Parent = controlsRow,
 	})
 
-	local playPauseBtn = create("TextButton", {
+	local playPauseBtn = create("ImageButton", {
 		Name = "PlayPauseBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "▶",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextScaled = true,
+		Image = "rbxassetid://124090122421689", -- custom play icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.36, 1),
+		Position = UDim2.fromScale(0.5, 0.4),
+		Size = UDim2.fromScale(0.2, 0.6),
 		ZIndex = 34,
 		Parent = controlsRow,
 	})
 
-	local nextBtn = create("TextButton", {
+	local nextBtn = create("ImageButton", {
 		Name = "NextBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⏭",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextScaled = true,
+		Image = "rbxassetid://115488581897890", -- custom skip next icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.9, 0.5),
-		Size = UDim2.fromScale(0.28, 0.9),
+		Position = UDim2.fromScale(0.9, 0.4),
+		Size = UDim2.fromScale(0.15, 0.5),
 		ZIndex = 34,
 		Parent = controlsRow,
 	})
@@ -343,7 +323,7 @@ function LockScreen.Create(context: any)
 		timeRemLabel.Text = "-" .. formatTime(dur - pos)
 
 		-- Play/Pause icon
-		playPauseBtn.Text = state.IsPlaying and "⏸" or "▶"
+		playPauseBtn.Image = state.IsPlaying and "rbxassetid://72750581362856" or "rbxassetid://124090122421689"
 	end
 
 	-- Subscribe ke perubahan state musik (fired setiap Heartbeat dari Music app)

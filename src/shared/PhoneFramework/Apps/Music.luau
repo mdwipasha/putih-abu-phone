@@ -16,20 +16,16 @@ local remote = ReplicatedStorage:WaitForChild(Constants.RemoteName, 10)
 --  SONG CATALOG  (SoundId pakai rbxasset Roblox audio publik)
 -- ──────────────────────────────────────────────────────────────────────────
 local SONGS = {
-	{ Id = 1, Title = "Seandainya",          Artist = "Vierra", Album = "One Love", SoundId = "rbxassetid://108660587339108", Cover = "rbxassetid://94969502719436" },
-	{ Id = 2,  Title = "Black and Yellow",        Artist = "Wiz Khalifa",          Album = "O.N.I.F.C", SoundId = "rbxassetid://139235100", Cover = "rbxassetid://93243728949226" },
-	{ Id = 3,  Title = "I'm the one",          Artist = "DJ Khaled",            Album = "Major Key", SoundId = "rbxassetid://97188886257764", Cover = "rbxassetid://94969502719436" },
-	{ Id = 4,  Title = "Tabola Bale Bale",                Artist = "The Kid LAROI & Bieber", Album = "F*CK LOVE 3", SoundId = "rbxassetid://104207837699519", Cover = "rbxassetid://115291664497394" },
-	{ Id = 5,  Title = "Heat Waves",          Artist = "Glass Animals",       Album = "Dreamland", SoundId = "rbxassetid://1843045800", Cover = "rbxassetid://4483361816" },
-	{ Id = 6,  Title = "Peaches",             Artist = "Justin Bieber",       Album = "Justice", SoundId = "rbxassetid://1843046100", Cover = "rbxassetid://4483361816" },
-	{ Id = 7,  Title = "Watermelon Sugar",    Artist = "Harry Styles",        Album = "Fine Line", SoundId = "rbxassetid://1843046400", Cover = "rbxassetid://4483361816" },
-	{ Id = 8,  Title = "Good 4 U",            Artist = "Olivia Rodrigo",      Album = "SOUR", SoundId = "rbxassetid://1843046700", Cover = "rbxassetid://4483361816" },
-	{ Id = 9,  Title = "drivers license",     Artist = "Olivia Rodrigo",      Album = "SOUR", SoundId = "rbxassetid://1843047000", Cover = "rbxassetid://4483361816" },
-	{ Id = 10, Title = "Industry Baby",       Artist = "Lil Nas X",           Album = "Montero", SoundId = "rbxassetid://1843047300", Cover = "rbxassetid://4483361816" },
-	{ Id = 11, Title = "Butter",              Artist = "BTS",                 Album = "Butter", SoundId = "rbxassetid://1843047600", Cover = "rbxassetid://4483361816" },
-	{ Id = 12, Title = "As It Was",           Artist = "Harry Styles",        Album = "Harry's House", SoundId = "rbxassetid://1843047900", Cover = "rbxassetid://4483361816" },
-	{ Id = 13, Title = "Anti-Hero",           Artist = "Taylor Swift",        Album = "Midnights", SoundId = "rbxassetid://1843048200", Cover = "rbxassetid://4483361816" },
-	{ Id = 14, Title = "Flowers",             Artist = "Miley Cyrus",         Album = "Endless Summer Vacation", SoundId = "rbxassetid://1843048500", Cover = "rbxassetid://4483361816" },
+	{ Id = 1, Title = "Seandainya",          Artist = "Vierra", Album = "My First Love", SoundId = "rbxassetid://122627153664904", Cover = "rbxassetid://94969502719436" },
+	{ Id = 2,  Title = "Terlalu Lama",        Artist = "Vierra",          Album = "My First Love", SoundId = "rbxassetid://78065315164870", Cover = "rbxassetid://94969502719436" },
+	{ Id = 3,  Title = "Payphone",          Artist = "Maroon 5",            Album = "Overexposed", SoundId = "rbxassetid://73178465382668", Cover = "rbxassetid://90546379856263" },
+	{ Id = 4,  Title = "Baby",                Artist = "Justin Bieber", Album = "My World 2.0", SoundId = "rbxassetid://108005414313766", Cover = "rbxassetid://125096157303610" },
+	{ Id = 5,  Title = "Tabola Bale Bale",                Artist = "Silet Open Up", Album = "", SoundId = "rbxassetid://104207837699519", Cover = "" },
+	{ Id = 6,  Title = "Duka",             Artist = "Last Child",       Album = "Duka", SoundId = "rbxassetid://87619136997417", Cover = "" },
+	{ Id = 7,  Title = "Diary Depresiku",    Artist = "Last Child",        Album = "Everything We Are Everything", SoundId = "rbxassetid://93093345512049", Cover = "" },
+	{ Id = 8,  Title = "Lapang Dada",            Artist = "Sheila On 7",      Album = "Musim Yang Baik", SoundId = "rbxassetid://87418834280501", Cover = "" },
+	{ Id = 9,  Title = "No !",     Artist = "Vierra",      Album = "My First Love", SoundId = "rbxassetid://86229112891958", Cover = "rbxassetid://94969502719436" },
+	{ Id = 10, Title = "Perih",       Artist = "Vierra",           Album = "My First Love", SoundId = "rbxassetid://99291795667380", Cover = "rbxassetid://94969502719436" },
 }
 
 -- Warna-warna album art placeholder (bergantian supaya berwarna-warni)
@@ -66,8 +62,7 @@ function MusicApp.Create(context: any)
 	local currentTabId     = "home"  -- "home" | "now"
 	local sound            = nil   -- Instance Sound lokal (silent, untuk clock/progress UI)
 	local isDraggingProgress = false
-	local isDraggingVolume   = false
-	local currentVolume    = 1     -- Volume yang disimpan (0-1)
+	local currentVolume    = 0.25    -- Volume yang disimpan (0-1), default 25% agar tidak terlalu kencang
 
 	local Players   = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
@@ -241,27 +236,23 @@ function MusicApp.Create(context: any)
 		ZIndex = 59,
 		Parent = miniPlayer,
 	})
-	local miniPlayBtn = create("TextButton", {
+	local miniPlayBtn = create("ImageButton", {
 		Name = "MiniPlayButton",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "▶",
-		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextScaled = true,
-		Position = UDim2.fromScale(0.72, 0.12),
-		Size = UDim2.fromScale(0.12, 0.76),
+		Image = "rbxassetid://124090122421689", -- play icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
+		Position = UDim2.fromScale(0.72, 0.25),
+		Size = UDim2.fromScale(0.095, 0.5),
 		ZIndex = 59,
 		Parent = miniPlayer,
 	})
-	local miniNextBtn = create("TextButton", {
+	local miniNextBtn = create("ImageButton", {
 		Name = "MiniNextButton",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⏯",
-		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextScaled = true,
-		Position = UDim2.fromScale(0.86, 0.12),
-		Size = UDim2.fromScale(0.12, 0.76),
+		Image = "rbxassetid://115488581897890", -- skip next icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
+		Position = UDim2.fromScale(0.86, 0.25),
+		Size = UDim2.fromScale(0.095, 0.5),
 		ZIndex = 59,
 		Parent = miniPlayer,
 	})
@@ -325,15 +316,12 @@ function MusicApp.Create(context: any)
 		Parent = searchPanel,
 	})
 	create("UICorner", { CornerRadius = UDim.new(0.4, 0), Parent = searchBoxBg })
-	create("TextLabel", {
+	create("ImageLabel", {
 		Name = "SearchIcon",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "🔍︎",
-		TextColor3 = Color3.fromRGB(142, 142, 147),
-		TextScaled = true,
-		Position = UDim2.fromScale(0.02, 0.05),
-		Size = UDim2.fromScale(0.1, 0.9),
+		Image = "rbxassetid://91955678829293",
+		Position = UDim2.fromScale(0.025, 0.2),
+		Size = UDim2.fromScale(0.095, 0.6),
 		ZIndex = 55,
 		Parent = searchBoxBg,
 	})
@@ -349,7 +337,7 @@ function MusicApp.Create(context: any)
 		TextScaled = false,
 		TextSize = 11,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.fromScale(0.12, 0.05),
+		Position = UDim2.fromScale(0.15, 0.05),
 		Size = UDim2.fromScale(0.85, 0.9),
 		ZIndex = 55,
 		Parent = searchBoxBg,
@@ -394,19 +382,19 @@ function MusicApp.Create(context: any)
 		Name = "ArtworkFrame",
 		AnchorPoint = Vector2.new(0.5, 0),
 		BackgroundColor3 = Color3.fromRGB(252, 60, 92),
-		Position = UDim2.fromScale(0.5, 0.04),
-		Size = UDim2.fromScale(0.7, 0),
+		Position = UDim2.fromScale(0.5, 0.06),
+		Size = UDim2.fromScale(0.7, 0.7),
+		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		ZIndex = 54,
 		Parent = nowPanel,
 	})
-	create("UIAspectRatioConstraint", { AspectRatio = 1, Parent = artworkFrame })
 	create("UICorner", { CornerRadius = UDim.new(0.06, 0), Parent = artworkFrame })
 	-- Note icon di tengah artwork
 	local noteIcon = create("TextLabel", {
 		Name = "NoteIcon",
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
-		Text = "♫",
+		Text = "🎵",
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextTransparency = 0.3,
 		TextScaled = true,
@@ -421,24 +409,11 @@ function MusicApp.Create(context: any)
 		Name = "CoverImage",
 		BackgroundTransparency = 1,
 		Size = UDim2.fromScale(1, 1),
-		ZIndex = 56,
+		ZIndex = 60,
 		Visible = false,
 		Parent = artworkFrame,
 	})
 	create("UICorner", { CornerRadius = UDim.new(0.06, 0), Parent = coverImage })
-
-	-- Shadow bawah artwork
-	local artShadow = create("Frame", {
-		Name = "ArtShadow",
-		AnchorPoint = Vector2.new(0.5, 0),
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		BackgroundTransparency = 0.6,
-		Position = UDim2.fromScale(0.5, 0.04),
-		Size = UDim2.fromScale(0.72, 0.005),
-		ZIndex = 53,
-		Parent = nowPanel,
-	})
-	create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = artShadow })
 
 	-- Info lagu
 	local songTitle = create("TextLabel", {
@@ -549,72 +524,70 @@ function MusicApp.Create(context: any)
 		Parent = nowPanel,
 	})
 
-	local shuffleBtn = create("TextButton", {
+	-- Icon asset IDs untuk kontrol playback (Roblox built-in icons)
+	-- rbxassetid://7743869985 = skip next | 7743870447 = skip prev
+	-- rbxassetid://7733960981 = play      | 7743870727 = pause
+	-- rbxassetid://7743871135 = shuffle   | 7743870013 = repeat
+	local shuffleBtn = create("ImageButton", {
 		Name = "ShuffleBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⇄",
-		TextColor3 = Color3.fromRGB(142, 142, 147),
-		TextScaled = true,
+		BackgroundColor3 = Color3.fromRGB(220, 220, 225),
+		Image = "rbxassetid://139426024335886", -- shuffle icon
+		ImageColor3 = Color3.fromRGB(142, 142, 147),
 		Position = UDim2.fromScale(0, 0.1),
-		Size = UDim2.fromScale(0.14, 0.8),
+		Size = UDim2.fromScale(0.12, 0.75),
 		ZIndex = 55,
 		Parent = controlRow,
 	})
-	local prevBtn = create("TextButton", {
+	create("UICorner", { CornerRadius = UDim.new(0.25, 0), Parent = shuffleBtn })
+	local prevBtn = create("ImageButton", {
 		Name = "PrevBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⏮",
-		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextScaled = true,
+		Image = "rbxassetid://106280938766613", -- skip previous icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		Position = UDim2.fromScale(0.19, 0.05),
-		Size = UDim2.fromScale(0.18, 0.9),
+		Size = UDim2.fromScale(0.16, 0.85),
 		ZIndex = 55,
 		Parent = controlRow,
 	})
-	local playPauseBtn = create("TextButton", {
+	local playPauseBtn = create("ImageButton", {
 		Name = "PlayPauseBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "▶",
-		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextScaled = true,
+		Image = "rbxassetid://124090122421689", -- play icon (default)
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		Position = UDim2.fromScale(0.4, 0),
-		Size = UDim2.fromScale(0.2, 1),
+		Size = UDim2.fromScale(0.18, 0.95),
 		ZIndex = 55,
 		Parent = controlRow,
 	})
-	local nextBtn = create("TextButton", {
+	local nextBtn = create("ImageButton", {
 		Name = "NextBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "⏯",
-		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextScaled = true,
+		Image = "rbxassetid://115488581897890", -- skip next icon
+		ImageColor3 = Color3.fromRGB(0, 0, 0),
 		Position = UDim2.fromScale(0.64, 0.05),
-		Size = UDim2.fromScale(0.18, 0.9),
+		Size = UDim2.fromScale(0.16, 0.85),
 		ZIndex = 55,
 		Parent = controlRow,
 	})
-	local repeatBtn = create("TextButton", {
+	local repeatBtn = create("ImageButton", {
 		Name = "RepeatBtn",
 		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "↻",
-		TextColor3 = Color3.fromRGB(142, 142, 147),
-		TextScaled = true,
+		BackgroundColor3 = Color3.fromRGB(220, 220, 225),
+		Image = "rbxassetid://134609968314396", -- repeat icon
+		ImageColor3 = Color3.fromRGB(142, 142, 147),
 		Position = UDim2.fromScale(0.86, 0.1),
-		Size = UDim2.fromScale(0.14, 0.8),
+		Size = UDim2.fromScale(0.12, 0.75),
 		ZIndex = 55,
 		Parent = controlRow,
 	})
+	create("UICorner", { CornerRadius = UDim.new(0.25, 0), Parent = repeatBtn })
 
 	-- Volume Slider
 	local volRow = create("Frame", {
 		Name = "VolumeRow",
 		BackgroundTransparency = 1,
-		Position = UDim2.fromScale(0.06, 0.875),
+		Position = UDim2.fromScale(0.06, 0.9),
 		Size = UDim2.fromScale(0.88, 0.04),
 		ZIndex = 54,
 		Parent = nowPanel,
@@ -646,7 +619,7 @@ function MusicApp.Create(context: any)
 		Name = "VolumeFill",
 		BackgroundColor3 = Color3.fromRGB(180, 180, 180),
 		BorderSizePixel = 0,
-		Size = UDim2.fromScale(0.7, 1),
+		Size = UDim2.fromScale(currentVolume, 1),
 		ZIndex = 56,
 		Parent = volTrack,
 	})
@@ -695,9 +668,9 @@ function MusicApp.Create(context: any)
 		artworkFrame.BackgroundColor3 = col
 		
 		if currentSong.Cover and currentSong.Cover ~= "" then
-			-- Decal ID → rbxthumb agar bisa render di ImageLabel
 			local id = tostring(currentSong.Cover):match("%d+")
 			if id then
+				-- Gunakan rbxthumb agar Decal ID bisa dirender sebagai image
 				coverImage.Image = "rbxthumb://type=Asset&id=" .. id .. "&w=420&h=420"
 			else
 				coverImage.Image = currentSong.Cover
@@ -716,13 +689,13 @@ function MusicApp.Create(context: any)
 		miniSongTitle.Text    = currentSong.Title
 		miniArtistLabel.Text  = currentSong.Artist
 
-		-- Play/Pause icons
+		-- Play/Pause icons (pakai ImageColor3 karena sudah ImageButton)
 		if isPlaying then
-			playPauseBtn.Text = "⏸"
-			miniPlayBtn.Text  = "⏸"
+			playPauseBtn.Image = "rbxassetid://72750581362856" -- pause icon
+			miniPlayBtn.Image  = "rbxassetid://72750581362856"
 		else
-			playPauseBtn.Text = "▶"
-			miniPlayBtn.Text  = "▶"
+			playPauseBtn.Image = "rbxassetid://124090122421689" -- play icon
+			miniPlayBtn.Image  = "rbxassetid://124090122421689"
 		end
 
 		-- Progress
@@ -765,6 +738,7 @@ function MusicApp.Create(context: any)
 				looped     = (repeatMode == 2),
 				rollOffMin = 40,
 				rollOffMax = 80,
+				volume     = currentVolume,
 			})
 		end
 
@@ -782,11 +756,11 @@ function MusicApp.Create(context: any)
 
 		-- Artwork bounce animation
 		TweenService:Create(artworkFrame, TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.fromScale(0.72, 0),
+			Size = UDim2.fromScale(0.72, 0.72),
 		}):Play()
 		task.delay(0.15, function()
 			TweenService:Create(artworkFrame, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-				Size = UDim2.fromScale(0.7, 0),
+				Size = UDim2.fromScale(0.7, 0.7),
 			}):Play()
 		end)
 
@@ -1125,7 +1099,8 @@ function MusicApp.Create(context: any)
 
 	shuffleBtn.Activated:Connect(function()
 		isShuffle = not isShuffle
-		shuffleBtn.TextColor3 = isShuffle
+		shuffleBtn.BackgroundTransparency = isShuffle and 0.4 or 1
+		shuffleBtn.ImageColor3 = isShuffle
 			and Color3.fromRGB(252, 60, 92)
 			or Color3.fromRGB(142, 142, 147)
 	end)
@@ -1133,14 +1108,20 @@ function MusicApp.Create(context: any)
 	repeatBtn.Activated:Connect(function()
 		repeatMode = (repeatMode + 1) % 3
 		if repeatMode == 0 then
-			repeatBtn.TextColor3 = Color3.fromRGB(142, 142, 147)
-			repeatBtn.Text = "↻"
+			-- off
+			repeatBtn.BackgroundTransparency = 1
+			repeatBtn.ImageColor3 = Color3.fromRGB(142, 142, 147)
+			repeatBtn.Image = "rbxassetid://134609968314396" -- repeat icon normal
 		elseif repeatMode == 1 then
-			repeatBtn.TextColor3 = Color3.fromRGB(252, 60, 92)
-			repeatBtn.Text = "↻"
+			-- repeat all
+			repeatBtn.BackgroundTransparency = 0.4
+			repeatBtn.ImageColor3 = Color3.fromRGB(252, 60, 92)
+			repeatBtn.Image = "rbxassetid://134609968314396" -- repeat icon aktif
 		else
-			repeatBtn.TextColor3 = Color3.fromRGB(252, 60, 92)
-			repeatBtn.Text = "①"
+			-- repeat one
+			repeatBtn.BackgroundTransparency = 0.4
+			repeatBtn.ImageColor3 = Color3.fromRGB(252, 60, 92)
+			repeatBtn.Image = "rbxassetid://132258851381293" -- repeat-one icon
 		end
 		if sound then sound.Looped = (repeatMode == 2) end
 	end)
