@@ -267,6 +267,26 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 			local s = oldPart:FindFirstChild("MusicSound")
 			if s then s.Volume = math.clamp(value or 1, 0, 1) end
 		end
+
+	elseif action == "AirDropContact" then
+		-- value = { targetUserId = number, contactData = table }
+		if type(value) == "table" and value.targetUserId and value.contactData then
+			local targetPlayer = Players:GetPlayerByUserId(value.targetUserId)
+			if targetPlayer and targetPlayer ~= player and targetPlayer.Character and character then
+				local myHRP = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+				local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+				if myHRP and targetHRP then
+					local distance = (myHRP.Position - targetHRP.Position).Magnitude
+					if distance <= 40 then -- Maksimal radius 40 studs (~13 meter)
+						remote:FireClient(targetPlayer, "ReceiveAirDropContact", {
+							senderUserId = player.UserId,
+							senderName = player.DisplayName or player.Name,
+							contactData = value.contactData,
+						})
+					end
+				end
+			end
+		end
 	end
 end)
 

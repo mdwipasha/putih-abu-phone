@@ -89,6 +89,18 @@ function PhoneController.new()
 		end
 	end)
 
+	if self._remote and self._remote:IsA("RemoteEvent") then
+		self._remote.OnClientEvent:Connect(function(action: string, payload: any)
+			if action == "ReceiveAirDropContact" and payload then
+				self:SendNotification({
+					Title = "📡 AirDrop Kontak Masuk",
+					Text = (payload.senderName or "Seseorang") .. " mengirim kontak via AirDrop. Buka app Contacts!",
+					Duration = 5,
+				})
+			end
+		end)
+	end
+
 	return self
 end
 
