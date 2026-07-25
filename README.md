@@ -102,3 +102,51 @@ return App
 ```
 
 > **Note on Icons:** You must use a valid Roblox Asset ID (`rbxassetid://...`) for the `Icon.Image`. Local files (`.png` or `.ico`) cannot be loaded dynamically by Roblox UI at runtime; they must be uploaded to Roblox first.
+
+---
+
+## Bank App Integration
+
+The Bank app is a presentation-only client for the standalone Economy Framework. It never reads DataStores, economy cache modules, or internal economy services directly.
+
+### Folder Structure
+
+- `src/shared/PhoneFramework/Apps/Bank.luau` - mobile banking UI, local `BankState`, page navigation, dialogs, transfer form, transaction list, and transaction details.
+- `src/shared/PhoneFramework/Services/EconomyAdapter.luau` - client adapter used by the Bank UI. It wraps remote calls in protected calls, normalizes responses, and returns placeholders when the economy service is unavailable.
+- `src/server/EconomyNetwork.server.luau` - server bridge from remotes to the public `EconomyFramework.API.Economy` module.
+- `src/server/EconomyFramework/API/Economy.luau` - public Economy Framework API surface.
+
+### Public Interfaces
+
+The Bank UI calls only `EconomyAdapter`:
+
+```luau
+EconomyAdapter.GetPlayerData()
+EconomyAdapter.GetBalance()
+EconomyAdapter.GetPhoneNumber()
+EconomyAdapter.GetTransactionHistory()
+EconomyAdapter.Transfer(phoneNumber, amount, description)
+EconomyAdapter.OnBalanceChanged(callback)
+EconomyAdapter.OnTransactionCreated(callback)
+EconomyAdapter.OnPlayerDataLoaded(callback)
+```
+
+The server bridge calls only public Economy APIs such as `Economy.GetBalance`, `Economy.GetPhoneNumber`, `Economy.GetTransactionHistory`, `Economy.TransferByPhone`, and `Economy.GetPlayerData`.
+
+### State Management
+
+`Bank.luau` renders from a local `BankState` containing balance, phone number, player name, transactions, loading state, loaded state, error state, current page, and selected transaction. Economy values are refreshed through the adapter; the UI does not modify balances or manufacture transaction history.
+
+### Event Usage
+
+The server bridge forwards public economy events to the owning client:
+
+- `BalanceChanged` refreshes balance and account data.
+- `TransactionCreated` refreshes transaction history.
+- `PlayerDataLoaded` refreshes the full UI.
+
+The app does not continuously poll. While offline or waiting for remotes/data, it opens immediately with placeholders: balance `0`, phone number `-`, player name `Unknown`, and an empty transaction list.
+
+### Extension Points
+
+Future banking features such as ATM, savings, loans, bills, taxes, marketplace purchases, or multiple accounts should add UI pages and adapter methods first. Keep business rules in the Economy Framework and expose them through public economy APIs before wiring them into the Bank app.
