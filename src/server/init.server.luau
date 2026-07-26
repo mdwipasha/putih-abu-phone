@@ -433,8 +433,34 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 				})
 			end
 		end
+
+	elseif action == "RequestPhoneData" then
+		local data = Economy.GetPlayerData(player)
+		if data and data.Phone then
+			remote:FireClient(player, "LoadPhoneData", data.Phone)
+		end
+
+	elseif action == "SavePhoneData" then
+		if type(value) == "table" and type(value.Key) == "string" then
+			local data = Economy.GetPlayerData(player)
+			if data then
+				data.Phone = data.Phone or {}
+				data.Phone[value.Key] = value.Value
+				Economy.SavePlayer(player)
+			end
+		end
 	end
 end)
+
+Economy.Init()
+
+if Economy.Events and Economy.Events.PlayerDataLoaded then
+	Economy.Events.PlayerDataLoaded:Connect(function(player: Player, data: { [string]: any })
+		if data and data.Phone then
+			remote:FireClient(player, "LoadPhoneData", data.Phone)
+		end
+	end)
+end
 
 Players.PlayerRemoving:Connect(function(player)
 	local character = player.Character

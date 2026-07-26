@@ -121,6 +121,31 @@ function MessagesApp.Create(context: any)
 		Threads = saveService:Get("MessagesHistory", {}),
 	}
 
+	local function cleanPhoneStr(pStr: any): string
+		if type(pStr) ~= "string" then return "" end
+		return string.gsub(pStr, "[%s%-]", "")
+	end
+
+	local function resolveContactName(phone: string?, fallbackPhone: string?): string
+		local rawPhone = phone or fallbackPhone or ""
+		local targetClean = cleanPhoneStr(rawPhone)
+		if targetClean == "" then
+			return rawPhone ~= "" and rawPhone or "Pesan"
+		end
+
+		local contacts = saveService:Get("Contacts", {})
+		for _, c in ipairs(contacts) do
+			if cleanPhoneStr(c.Phone) == targetClean then
+				if c.Name and c.Name ~= "" then
+					return c.Name
+				end
+			end
+		end
+
+		-- Jika tidak ada di daftar kontak, tampilkan NOMOR HP SAJA (bukan DisplayName)
+		return rawPhone
+	end
+
 	-- Root Container
 	local rootFrame = create("Frame", {
 		Name = "MessagesRoot",
@@ -451,11 +476,13 @@ function MessagesApp.Create(context: any)
 			})
 			rounded(avatar, 20)
 
+			local displayName = resolveContactName(thread.PartnerPhone, thread.PartnerName)
+
 			label({
 				Name = "Name",
 				Parent = card,
 				Font = Constants.Fonts.Semibold,
-				Text = thread.PartnerName or thread.PartnerPhone or "Lawan Obrolan",
+				Text = displayName,
 				TextColor3 = COLORS.TextDark,
 				Position = UDim2.new(0, 60, 0, 10),
 				Size = UDim2.new(0.55, 0, 0, 18),
@@ -507,7 +534,8 @@ function MessagesApp.Create(context: any)
 		chatRoomView.Visible = true
 		composeBtn.Visible = false
 		callHeaderBtn.Visible = true
-		titleLabel.Text = thread.PartnerName or thread.PartnerPhone or "Pesan"
+		local displayName = resolveContactName(thread.PartnerPhone, thread.PartnerName)
+		titleLabel.Text = displayName
 		backBtn.Text = "く"
 
 		for _, child in ipairs(chatMessagesScroll:GetChildren()) do
@@ -556,9 +584,17 @@ function MessagesApp.Create(context: any)
 				Parent = bubble,
 			})
 
+			create("UIListLayout", {
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Padding = UDim.new(0, 2),
+				HorizontalAlignment = if isOut then Enum.HorizontalAlignment.Right else Enum.HorizontalAlignment.Left,
+				Parent = bubble,
+			})
+
 			label({
 				Name = "Text",
 				Parent = bubble,
+				LayoutOrder = 1,
 				Font = Constants.Fonts.Regular,
 				Text = msg.Text or "",
 				TextColor3 = if isOut then COLORS.TextOutgoing else COLORS.TextIncoming,
@@ -566,6 +602,22 @@ function MessagesApp.Create(context: any)
 				TextWrapped = true,
 				TextScaled = false,
 				TextXAlignment = Enum.TextXAlignment.Left,
+				AutomaticSize = Enum.AutomaticSize.XY,
+				Size = UDim2.new(0, 0, 0, 0),
+				ZIndex = 56,
+			})
+
+			local timeStr = os.date("%H:%M", msg.Timestamp or os.time())
+			label({
+				Name = "Time",
+				Parent = bubble,
+				LayoutOrder = 2,
+				Font = Constants.Fonts.Regular,
+				Text = timeStr,
+				TextColor3 = if isOut then Color3.fromRGB(225, 245, 230) else Color3.fromRGB(142, 142, 147),
+				TextSize = 9,
+				TextScaled = false,
+				TextXAlignment = if isOut then Enum.TextXAlignment.Right else Enum.TextXAlignment.Left,
 				AutomaticSize = Enum.AutomaticSize.XY,
 				Size = UDim2.new(0, 0, 0, 0),
 				ZIndex = 56,
@@ -1001,9 +1053,12 @@ function MessagesApp.Create(context: any)
 	if remote and remote:IsA("RemoteEvent") then
 		remoteConnection = remote.OnClientEvent:Connect(function(action: string, payload: any)
 			if action == "ReceiveSMS" and payload then
+				local senderPhone = payload.senderPhone or ""
+				local displayName = resolveContactName(senderPhone, payload.senderName)
+
 				local existingThread = nil
 				for _, th in ipairs(state.Threads) do
-					if th.PartnerUserId == payload.senderUserId or th.PartnerPhone == payload.senderPhone then
+					if cleanPhoneStr(th.PartnerPhone) == cleanPhoneStr(senderPhone) or (payload.senderUserId and th.PartnerUserId == payload.senderUserId) then
 						existingThread = th
 						break
 					end
@@ -1012,12 +1067,14 @@ function MessagesApp.Create(context: any)
 				if not existingThread then
 					existingThread = {
 						Id = "th_" .. tick(),
-						PartnerName = payload.senderName or "Pengirim SMS",
-						PartnerPhone = payload.senderPhone or "08xxxxxx",
+						PartnerName = displayName,
+						PartnerPhone = senderPhone,
 						PartnerUserId = payload.senderUserId,
 						Messages = {},
 					}
 					table.insert(state.Threads, 1, existingThread)
+				else
+					existingThread.PartnerName = displayName
 				end
 
 				table.insert(existingThread.Messages, {

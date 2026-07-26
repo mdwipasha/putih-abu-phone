@@ -89,30 +89,64 @@ function PhoneController.new()
 		end
 	end)
 
+	local function resolveContactName(phone: string?, fallbackName: string?): string
+		local rawPhone = phone or fallbackName or ""
+		local targetClean = string.gsub(rawPhone, "[%s%-]", "")
+		if targetClean == "" then return rawPhone end
+
+		local saveSvc = self._services and self._services.SaveService
+		local contacts = if saveSvc then saveSvc:Get("Contacts", {}) else {}
+		for _, c in ipairs(contacts) do
+			local cPhone = string.gsub(c.Phone or "", "[%s%-]", "")
+			if cPhone == targetClean and c.Name and c.Name ~= "" then
+				return c.Name
+			end
+		end
+		return rawPhone
+	end
+
 	if self._remote and self._remote:IsA("RemoteEvent") then
 		self._remote.OnClientEvent:Connect(function(action: string, payload: any)
-			if action == "ReceiveAirDropContact" and payload then
+			if action == "LoadPhoneData" and payload then
+				if self._services and self._services.SaveService then
+					self._services.SaveService:LoadData(payload)
+				end
+			elseif action == "ReceiveAirDropContact" and payload then
 				self:SendNotification({
 					Title = "📡 AirDrop Kontak Masuk",
-					Text = (payload.senderName or "Seseorang") .. " mengirim kontak via AirDrop. Buka app Contacts!",
+					Text = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " mengirim kontak via AirDrop.",
 					Duration = 5,
 				})
 			elseif action == "IncomingCall" and payload then
+				local callerDisp = resolveContactName(payload.callerPhone, payload.callerName)
 				self:SendNotification({
 					Title = "📞 Panggilan Masuk",
-					Text = (payload.callerName or "Seseorang") .. " memanggil Anda... Buka app Phone!",
+					Text = callerDisp .. " memanggil Anda...",
 					Duration = 6,
 				})
-				if self._opened and not self._locked then
-					self:OpenApp("phone")
+				-- Requirement 3: Panggilan Masuk Membuka HP Otomatis
+				if not self._opened then
+					self:Open()
 				end
+				self._locked = false
+				if self._inputManager then
+					self._inputManager:SetButtonVisualState(true)
+				end
+				self._appManager:Open("phone")
+
 			elseif action == "ReceiveSMS" and payload then
+				local senderDisp = resolveContactName(payload.senderPhone, payload.senderName)
 				self:SendNotification({
 					Title = "💬 Pesan Masuk",
-					Text = (payload.senderName or "SMS") .. ": " .. (payload.messageText or ""),
+					Text = senderDisp .. ": " .. (payload.messageText or ""),
 					Duration = 5,
 				})
 			end
+		end)
+
+		-- Minta data telepon yang tersimpan di DataStore server saat pertama kali muat
+		task.defer(function()
+			self._remote:FireServer("RequestPhoneData")
 		end)
 	end
 

@@ -146,6 +146,31 @@ function PhoneApp.Create(context: any)
 		CallStartTime = 0,
 	}
 
+	local function cleanPhoneStr(pStr: any): string
+		if type(pStr) ~= "string" then return "" end
+		return string.gsub(pStr, "[%s%-]", "")
+	end
+
+	local function resolveContactName(phone: string?, fallbackPhone: string?): string
+		local rawPhone = phone or fallbackPhone or ""
+		local targetClean = cleanPhoneStr(rawPhone)
+		if targetClean == "" then
+			return rawPhone ~= "" and rawPhone or "Seseorang"
+		end
+
+		local contacts = saveService:Get("Contacts", {})
+		for _, c in ipairs(contacts) do
+			if cleanPhoneStr(c.Phone) == targetClean then
+				if c.Name and c.Name ~= "" then
+					return c.Name
+				end
+			end
+		end
+
+		-- Jika tidak ada di daftar kontak, tampilkan NOMOR HP SAJA (bukan DisplayName)
+		return rawPhone
+	end
+
 	-- Root Container
 	local rootFrame = create("Frame", {
 		Name = "PhoneRoot",
@@ -480,6 +505,7 @@ function PhoneApp.Create(context: any)
 		for idx, log in ipairs(recents) do
 			local isMissed = log.Type == "missed"
 			local textColor = if isMissed then COLORS.DestructiveRed else COLORS.TextDark
+			local displayName = resolveContactName(log.Phone, log.Name)
 
 			local row = create("Frame", {
 				Name = "Recent_" .. idx,
@@ -497,7 +523,7 @@ function PhoneApp.Create(context: any)
 				Name = "Name",
 				Parent = row,
 				Font = Constants.Fonts.Semibold,
-				Text = log.Name or log.Phone or "Panggilan",
+				Text = displayName,
 				TextColor3 = textColor,
 				TextTruncate = Enum.TextTruncate.AtEnd,
 				Position = UDim2.new(0, 14, 0, 10),
@@ -908,11 +934,19 @@ function PhoneApp.Create(context: any)
 	-- startCall: do NOT open call screen yet; wait for server response:
 	--   CallRinging  → show call screen (number exists, may be offline)
 	--   CallFailed   → show notification (number not in DataStore at all)
-	startCall = function(target: { name: string?, phone: string?, userId: number? })
-		local targetPhone = target.phone or state.DialedNumber
-		local targetName = target.name or targetPhone
+	local function resolveContactName(phone, defaultName)
+		local contacts = saveService:Get("Contacts", {})
+		for _, c in pairs(contacts) do
+			if c.Phone == phone then return c.Name end
+		end
+		return defaultName or phone
+	end
 
-		if targetPhone == "" then return end
+	startCall = function(target: { name: string?, phone: string?, userId: number? })
+		local phoneNum = target.phone or ""
+		local displayName = resolveContactName(phoneNum, target.name)
+
+		if phoneNum == "" then return end
 
 		if state.CallState ~= "idle" then return end
 
@@ -920,13 +954,13 @@ function PhoneApp.Create(context: any)
 		if remote and remote:IsA("RemoteEvent") then
 			remote:FireServer("StartCall", {
 				targetUserId = target.userId,
-				targetPhone = targetPhone,
+				targetPhone = phoneNum,
 			})
 		end
 
 		-- Pre-set partner info (screen will open when server responds with CallRinging)
 		state.CallState = "ringing"
-		state.CallPartner = { name = targetName, phone = targetPhone, userId = target.userId }
+		state.CallPartner = { name = displayName, phone = phoneNum, userId = target.userId }
 	end
 
 	endCallBtn.Activated:Connect(function()
@@ -1022,12 +1056,12 @@ function PhoneApp.Create(context: any)
 		remoteConnection = remote.OnClientEvent:Connect(function(action: string, payload: any)
 			if action == "CallRinging" and payload then
 				-- Server confirmed target exists (may be offline): show call screen
-				local tName = payload.targetName or (state.CallPartner and state.CallPartner.name) or (payload.targetPhone or "")
 				local tPhone = payload.targetPhone or ""
+				local displayName = resolveContactName(tPhone, payload.targetName)
 				local tUserId = payload.targetUserId
 
-				state.CallPartner = { name = tName, phone = tPhone, userId = tUserId }
-				callPartnerName.Text = tName
+				state.CallPartner = { name = displayName, phone = tPhone, userId = tUserId }
+				callPartnerName.Text = displayName
 				callStatusLabel.Text = if payload.isOnline then "Berdering..." else "Memanggil..."
 				if tUserId then
 					callAvatar.Image = "rbxthumb://type=AvatarBust&id=" .. tUserId .. "&w=150&h=150"
@@ -1039,7 +1073,7 @@ function PhoneApp.Create(context: any)
 				-- Log to Recents
 				local recents = saveService:Get("RecentsCalls", {})
 				table.insert(recents, 1, {
-					Name = tName,
+					Name = displayName,
 					Phone = tPhone,
 					UserId = tUserId,
 					Type = "outgoing",
@@ -1048,9 +1082,12 @@ function PhoneApp.Create(context: any)
 				saveService:Set("RecentsCalls", recents)
 
 			elseif action == "IncomingCall" and payload then
-				state.CallPartner = { userId = payload.callerUserId, name = payload.callerName, phone = payload.callerPhone }
-				incName.Text = payload.callerName or "Seseorang"
-				incSub.Text = payload.callerPhone or "Panggilan Masuk"
+				local callerPhone = payload.callerPhone or ""
+				local displayName = resolveContactName(callerPhone, payload.callerName)
+
+				state.CallPartner = { userId = payload.callerUserId, name = displayName, phone = callerPhone }
+				incName.Text = displayName
+				incSub.Text = callerPhone
 				if payload.callerUserId then
 					incAvatar.Image = "rbxthumb://type=AvatarBust&id=" .. payload.callerUserId .. "&w=150&h=150"
 				end
@@ -1059,8 +1096,8 @@ function PhoneApp.Create(context: any)
 				-- Log incoming
 				local recents = saveService:Get("RecentsCalls", {})
 				table.insert(recents, 1, {
-					Name = payload.callerName,
-					Phone = payload.callerPhone,
+					Name = displayName,
+					Phone = callerPhone,
 					UserId = payload.callerUserId,
 					Type = "incoming",
 					Timestamp = os.time(),
