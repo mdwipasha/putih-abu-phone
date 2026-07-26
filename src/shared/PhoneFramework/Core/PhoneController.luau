@@ -38,6 +38,7 @@ function PhoneController.new()
 		_armAnim = PlayerArmAnimation.new(),
 		_opened = false,
 		_locked = true,
+		_autoCloseNotif = false,
 		_remote = ReplicatedStorage:WaitForChild(Constants.RemoteName, 10),
 		_services = {
 			CameraService = CameraService.new(),
@@ -113,15 +114,21 @@ function PhoneController.new()
 				end
 			elseif action == "ReceiveAirDropContact" and payload then
 				self:SendNotification({
+					AppId = "contacts",
+					AppName = "Contacts",
+					AppIcon = "rbxassetid://114778546922350",
 					Title = "📡 AirDrop Kontak Masuk",
-					Text = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " mengirim kontak via AirDrop.",
+					Body = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " mengirim kontak via AirDrop.",
 					Duration = 5,
 				})
 			elseif action == "IncomingCall" and payload then
 				local callerDisp = resolveContactName(payload.callerPhone, payload.callerName)
 				self:SendNotification({
+					AppId = "phone",
+					AppName = "Phone",
+					AppIcon = "rbxassetid://71727318918905",
 					Title = "📞 Panggilan Masuk",
-					Text = callerDisp .. " memanggil Anda...",
+					Body = callerDisp .. " memanggil Anda...",
 					Duration = 6,
 				})
 				-- Requirement 3: Panggilan Masuk Membuka HP Otomatis
@@ -129,6 +136,7 @@ function PhoneController.new()
 					self:Open()
 				end
 				self._locked = false
+				self._autoCloseNotif = false
 				if self._inputManager then
 					self._inputManager:SetButtonVisualState(true)
 				end
@@ -137,8 +145,11 @@ function PhoneController.new()
 			elseif action == "ReceiveSMS" and payload then
 				local senderDisp = resolveContactName(payload.senderPhone, payload.senderName)
 				self:SendNotification({
+					AppId = "messages",
+					AppName = "Messages",
+					AppIcon = "rbxassetid://108650574179237",
 					Title = "💬 Pesan Masuk",
-					Text = senderDisp .. ": " .. (payload.messageText or ""),
+					Body = senderDisp .. ": " .. (payload.messageText or ""),
 					Duration = 5,
 				})
 			end
@@ -211,6 +222,7 @@ function PhoneController:Lock()
 end
 
 function PhoneController:Unlock()
+	self._autoCloseNotif = false
 	if not self._opened then
 		return
 	end
@@ -223,6 +235,7 @@ function PhoneController:Unlock()
 end
 
 function PhoneController:OpenApp(appId: string)
+	self._autoCloseNotif = false
 	if not self._opened then
 		self:Open()
 	end
@@ -235,6 +248,7 @@ function PhoneController:OpenApp(appId: string)
 end
 
 function PhoneController:CloseCurrentApp()
+	self._autoCloseNotif = false
 	if self._locked then
 		return
 	end
@@ -242,7 +256,52 @@ function PhoneController:CloseCurrentApp()
 end
 
 function PhoneController:SendNotification(notification: any)
-	self._notifications:Send(notification)
+	-- Cek apakah HP sedang dibuka & pemain sedang di aplikasi penerima event
+	-- Gunakan _currentAppId langsung (AppManager tidak punya GetCurrentAppId)
+	local currentApp = ""
+	if self._opened and not self._locked and self._appManager then
+		currentApp = string.lower(self._appManager._currentAppId or "")
+	end
+
+	local notifApp = string.lower(notification.AppId or notification.App or "")
+
+	-- Kontekstual: Jika pemain sedang AKTIF di aplikasi yang menerima event tersebut,
+	-- jangan tampilkan banner (informasi sudah terlihat langsung di dalam aplikasi).
+	-- Tapi tetap tampilkan jika di Home Screen (currentApp == "home") atau aplikasi lain.
+	if self._opened and not self._locked
+		and notifApp ~= ""
+		and currentApp ~= ""
+		and currentApp ~= "home"
+		and currentApp == notifApp
+	then
+		return
+	end
+
+	local wereClosed = not self._opened
+
+	if wereClosed then
+		self:Open()
+		self._autoCloseNotif = true
+	end
+
+	self._notifications:Send(
+		notification,
+		function(wasClicked: boolean)
+			if wasClicked then
+				self._autoCloseNotif = false
+				if notification.AppId then
+					self:Unlock()
+					self:OpenApp(notification.AppId)
+				end
+			end
+		end,
+		function()
+			if self._autoCloseNotif and self._opened then
+				self._autoCloseNotif = false
+				self:Close()
+			end
+		end
+	)
 end
 
 function PhoneController:IsOpened()
