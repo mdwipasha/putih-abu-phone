@@ -264,7 +264,7 @@ function LockScreen.Create(context: any)
 		Parent = controlsRow,
 	})
 
-	-- ── "slide to unlock" ─────────────────────────────────────────────────
+	-- ── "click to unlock" ─────────────────────────────────────────────────
 	local slider = create("TextButton", {
 		Name = "ClickToUnlock",
 		AutoButtonColor = false,

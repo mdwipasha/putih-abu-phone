@@ -6,25 +6,6 @@ local Constants = require(root:WaitForChild("Shared"):WaitForChild("Constants"))
 local StatusBar = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("StatusBar"))
 local create = require(root:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
 
-local DEFAULT_IMAGES = {
-	"rbxassetid://137618063796337",
-	"rbxassetid://6031090532",
-	"rbxassetid://15154178525",
-	"rbxassetid://14732363934",
-	"rbxassetid://115758366877536",
-	"rbxassetid://125147726148745",
-}
-
-local function getPhotoThumbnail(photo, player)
-	if photo.Type == "front" then
-		return "rbxthumb://type=AvatarBust&id=" .. player.UserId .. "&w=420&h=420"
-	end
-	
-	local hash = tonumber(photo.Id) or 1
-	local index = (hash % #DEFAULT_IMAGES) + 1
-	return DEFAULT_IMAGES[index]
-end
-
 local GalleryApp = {
 	Id = "gallery",
 	Name = "Photos",
@@ -35,9 +16,9 @@ local GalleryApp = {
 	Order = 40,
 }
 
-function GalleryApp.Create(context)
+function GalleryApp.Create(context: any)
 	local player = Players.LocalPlayer
-	local saveService = context.Services.SaveService
+	local photoService = context.Services.PhotoService
 
 	local rootFrame = create("Frame", {
 		Name = "GalleryRoot",
@@ -45,21 +26,22 @@ function GalleryApp.Create(context)
 		Size = UDim2.fromScale(1, 1),
 	})
 
-	local statusBar = StatusBar.new(rootFrame, { Light = false })
+	StatusBar.new(rootFrame, { Light = false, Carrier = "Putih-Abu", Battery = "100%" })
 
+	-- ─── TOP NAVIGATION BAR ───────────────────────────────────────
 	local navBar = create("Frame", {
 		Name = "NavigationBar",
 		BackgroundColor3 = Color3.fromRGB(248, 248, 248),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0, 0),
-		Size = UDim2.new(1, 0, 0, 40),
+		Position = UDim2.new(0, 0, 0, Constants.Screen.StatusBarHeight),
+		Size = UDim2.new(1, 0, 0, 42),
 		ZIndex = 10,
 		Parent = rootFrame,
 	})
-	
+
 	create("Frame", {
 		Name = "Separator",
-		BackgroundColor3 = Color3.fromRGB(200, 200, 200),
+		BackgroundColor3 = Color3.fromRGB(200, 200, 205),
 		BorderSizePixel = 0,
 		Position = UDim2.new(0, 0, 1, -1),
 		Size = UDim2.new(1, 0, 0, 1),
@@ -72,13 +54,14 @@ function GalleryApp.Create(context)
 		Font = Constants.Fonts.Regular,
 		Text = "く",
 		TextColor3 = Color3.fromRGB(0, 122, 255),
-		TextSize = 21,
+		TextSize = 16,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 8, 0, 20),
-		Size = UDim2.new(0, 100, 0, 10),
+		Position = UDim2.new(0, 10, 0, 9),
+		Size = UDim2.new(0, 70, 0, 24),
+		ZIndex = 11,
 		Parent = navBar,
 	})
-	
+
 	backBtn.Activated:Connect(function()
 		context.CloseCurrentApp()
 	end)
@@ -87,11 +70,12 @@ function GalleryApp.Create(context)
 		Name = "Title",
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Semibold,
-		Text = "Moments",
+		Text = "Photos",
 		TextColor3 = Color3.fromRGB(0, 0, 0),
-		TextSize = 15,
-		Position = UDim2.new(0.25, 0, 0, 15),
-		Size = UDim2.new(0.5, 0, 0, 24),
+		TextSize = 16,
+		Position = UDim2.new(0.3, 0, 0, 9),
+		Size = UDim2.new(0.4, 0, 0, 24),
+		ZIndex = 11,
 		Parent = navBar,
 	})
 
@@ -101,75 +85,56 @@ function GalleryApp.Create(context)
 		Font = Constants.Fonts.Regular,
 		Text = "Select",
 		TextColor3 = Color3.fromRGB(0, 122, 255),
-		TextSize = 16,
+		TextSize = 15,
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Position = UDim2.new(1, -68, 0, 15),
+		Position = UDim2.new(1, -70, 0, 9),
 		Size = UDim2.new(0, 60, 0, 24),
+		ZIndex = 11,
 		Parent = navBar,
 	})
-	
-	selectBtn.Activated:Connect(function()
-		TweenService:Create(selectBtn, TweenInfo.new(0.1), { TextTransparency = 0.5 }):Play()
-		task.delay(0.1, function()
-			TweenService:Create(selectBtn, TweenInfo.new(0.1), { TextTransparency = 0 }):Play()
-		end)
-	end)
 
+	-- ─── BOTTOM TAB BAR (iOS 7 Style) ───────────────────────────
 	local tabBar = create("Frame", {
 		Name = "TabBar",
 		BackgroundColor3 = Color3.fromRGB(248, 248, 248),
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 1, -40),
-		Size = UDim2.new(1, 0, 0, 40),
+		Position = UDim2.new(0, 0, 1, -44),
+		Size = UDim2.new(1, 0, 0, 44),
 		ZIndex = 10,
 		Parent = rootFrame,
 	})
 	create("Frame", {
 		Name = "Separator",
-		BackgroundColor3 = Color3.fromRGB(200, 200, 200),
+		BackgroundColor3 = Color3.fromRGB(200, 200, 205),
 		BorderSizePixel = 0,
 		Position = UDim2.new(0, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 1),
 		Parent = tabBar,
 	})
 
-	local tabs = {
-		{ name = "Photos", color = Color3.fromRGB(0, 122, 255) },
-		{ name = "Shared", color = Color3.fromRGB(150, 150, 150) },
-		{ name = "Albums", color = Color3.fromRGB(150, 150, 150) }
-	}
-	
-	local tabWidth = 1 / #tabs
-	for i, tabInfo in ipairs(tabs) do
+	local tabNames = { "Photos", "Shared", "Albums" }
+	local tabWidth = 1 / #tabNames
+	for i, name in ipairs(tabNames) do
 		local btn = create("TextButton", {
-			Name = tabInfo.name,
+			Name = name .. "Tab",
 			BackgroundTransparency = 1,
-			Font = Constants.Fonts.Regular,
-			Text = tabInfo.name,
-			TextColor3 = tabInfo.color,
+			Font = Constants.Fonts.Semibold,
+			Text = name,
+			TextColor3 = if i == 1 then Color3.fromRGB(0, 122, 255) else Color3.fromRGB(140, 140, 145),
 			TextSize = 12,
-			TextYAlignment = Enum.TextYAlignment.Bottom,
-			Position = UDim2.new((i - 1) * tabWidth, 0, 0, 3),
-			Size = UDim2.new(tabWidth, 0, 1, -10),
+			Position = UDim2.new((i - 1) * tabWidth, 0, 0, 0),
+			Size = UDim2.new(tabWidth, 0, 1, 0),
 			Parent = tabBar,
 		})
-		
-		btn.Activated:Connect(function()
-			for _, child in ipairs(tabBar:GetChildren()) do
-				if child:IsA("TextButton") then
-					child.TextColor3 = Color3.fromRGB(150, 150, 150)
-				end
-			end
-			btn.TextColor3 = Color3.fromRGB(0, 122, 255)
-		end)
 	end
 
+	-- ─── PHOTOS GRID SCROLLING FRAME ─────────────────────────────
 	local scrollFrame = create("ScrollingFrame", {
 		Name = "PhotosGrid",
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Position = UDim2.new(0, 0, 0, 64),
-		Size = UDim2.new(1, 0, 1, -113),
+		Position = UDim2.new(0, 0, 0, 66),
+		Size = UDim2.new(1, 0, 1, -110),
 		ScrollBarThickness = 2,
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		Parent = rootFrame,
@@ -177,12 +142,12 @@ function GalleryApp.Create(context)
 
 	local gridLayout = create("UIGridLayout", {
 		CellPadding = UDim2.new(0, 2, 0, 2),
-		CellSize = UDim2.new(0, 100, 0, 100), -- Ukuran awal
+		CellSize = UDim2.new(0, 95, 0, 95),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = scrollFrame,
 	})
-	
-	-- Sesuaikan grid size supaya persis memuat 3 kolom tanpa spasi sisa
+
+	-- Dynamic 3-column cell sizing
 	scrollFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		if scrollFrame.AbsoluteSize.X > 0 then
 			local width = scrollFrame.AbsoluteSize.X
@@ -194,161 +159,235 @@ function GalleryApp.Create(context)
 	end)
 
 	gridLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		scrollFrame.CanvasSize = UDim2.new(0, 0, 0, gridLayout.AbsoluteContentSize.Y + 10)
+		scrollFrame.CanvasSize = UDim2.new(0, 0, 0, gridLayout.AbsoluteContentSize.Y + 12)
 	end)
 
-	local photoModal = create("Frame", {
-		Name = "PhotoModal",
-		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
-		Size = UDim2.fromScale(1, 1),
+	-- Empty state label if no photos
+	local emptyStateLabel = create("TextLabel", {
+		Name = "EmptyState",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1,
+		Font = Constants.Fonts.Regular,
+		Text = "No Photos or Videos\nYou can take photos using the Camera app.",
+		TextColor3 = Color3.fromRGB(140, 140, 145),
+		TextSize = 13,
+		Position = UDim2.fromScale(0.5, 0.45),
+		Size = UDim2.new(0.8, 0, 0.3, 0),
 		Visible = false,
-		ZIndex = 50,
+		ZIndex = 5,
 		Parent = rootFrame,
 	})
 
-	local modalHeader = create("Frame", {
-		Name = "ModalHeader",
-		BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-		BackgroundTransparency = 0.5,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0, 64),
-		ZIndex = 52,
-		Parent = photoModal,
-	})
-	
-	local modalBackBtn = create("TextButton", {
-		Name = "BackButton",
-		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Regular,
-		Text = "く Back",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextSize = 16,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Position = UDim2.new(0, 10, 0, 30),
-		Size = UDim2.new(0, 60, 0, 24),
-		ZIndex = 53,
-		Parent = modalHeader,
-	})
-	
-	local modalDateText = create("TextLabel", {
-		Name = "DateLabel",
-		BackgroundTransparency = 1,
-		Font = Constants.Fonts.Semibold,
-		Text = "Today",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextSize = 16,
-		Position = UDim2.new(0.2, 0, 0, 30),
-		Size = UDim2.new(0.6, 0, 0, 24),
-		ZIndex = 53,
-		Parent = modalHeader,
-	})
-
-	local pageContainer = create("Frame", {
-		Name = "PageContainer",
-		BackgroundTransparency = 1,
+	-- ─── FULLSCREEN PHOTO VIEWER MODAL ───────────────────────────
+	local photoModal = create("Frame", {
+		Name = "PhotoModal",
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
-		ZIndex = 51,
+		Visible = false,
+		ZIndex = 100,
+		Parent = rootFrame,
+	})
+
+	-- Header Fullscreen Modal
+	local modalHeader = create("Frame", {
+		Name = "ModalHeader",
+		BackgroundColor3 = Color3.fromRGB(15, 15, 18),
+		BackgroundTransparency = 0.2,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 0, 0, Constants.Screen.StatusBarHeight),
+		Size = UDim2.new(1, 0, 0, 42),
+		ZIndex = 102,
 		Parent = photoModal,
 	})
 
-	local pageLayout = create("UIPageLayout", {
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		EasingStyle = Enum.EasingStyle.Cubic,
-		EasingDirection = Enum.EasingDirection.Out,
-		TweenTime = 0.3,
-		FillDirection = Enum.FillDirection.Horizontal,
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-		Parent = pageContainer,
+	local modalBackBtn = create("TextButton", {
+		Name = "ModalBackButton",
+		BackgroundTransparency = 1,
+		Font = Constants.Fonts.Regular,
+		Text = "く",
+		TextColor3 = Color3.fromRGB(0, 122, 255),
+		TextSize = 16,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Position = UDim2.new(0, 10, 0, 9),
+		Size = UDim2.new(0, 80, 0, 24),
+		ZIndex = 103,
+		Parent = modalHeader,
 	})
-	
-	pageLayout:GetPropertyChangedSignal("CurrentPage"):Connect(function()
-		local currentPage = pageLayout.CurrentPage
-		if currentPage then
-			local dateVal = currentPage:FindFirstChild("DateInfo")
-			if dateVal then
-				modalDateText.Text = dateVal.Value
-			end
-		end
-	end)
-	
-	local function closePhoto()
+
+	local modalDateTitle = create("TextLabel", {
+		Name = "ModalDateTitle",
+		BackgroundTransparency = 1,
+		Font = Constants.Fonts.Semibold,
+		Text = "Photo",
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = 13,
+		Position = UDim2.new(0.25, 0, 0, 9),
+		Size = UDim2.new(0.5, 0, 0, 24),
+		ZIndex = 103,
+		Parent = modalHeader,
+	})
+
+	-- Viewport Central Container (16:9 Display)
+	local photoDisplayFrame = create("Frame", {
+		Name = "PhotoDisplayFrame",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.new(1, 0, 1, -100),
+		ZIndex = 101,
+		ClipsDescendants = true,
+		Parent = photoModal,
+	})
+
+	create("UIAspectRatioConstraint", {
+		AspectRatio = 16 / 9,
+		AspectType = Enum.AspectType.FitWithinMaxSize,
+		Parent = photoDisplayFrame,
+	})
+
+	local fullViewport = create("ViewportFrame", {
+		Name = "FullViewport",
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 101,
+		Parent = photoDisplayFrame,
+	})
+
+	-- Bottom Toolbar (Delete / Trash Can & Share)
+	local modalToolbar = create("Frame", {
+		Name = "ModalToolbar",
+		BackgroundColor3 = Color3.fromRGB(15, 15, 18),
+		BackgroundTransparency = 0.2,
+		BorderSizePixel = 0,
+		Position = UDim2.new(0, 0, 1, -46),
+		Size = UDim2.new(1, 0, 0, 46),
+		ZIndex = 102,
+		Parent = photoModal,
+	})
+
+	local deleteBtn = create("ImageButton", {
+		Name = "DeleteButton",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1,
+		Image = "rbxassetid://108650574179237", -- Trash / Action icon
+		ImageColor3 = Color3.fromRGB(255, 59, 48), -- iOS Red
+		Position = UDim2.new(0.85, 0, 0.5, 0),
+		Size = UDim2.new(0, 24, 0, 24),
+		ZIndex = 103,
+		Parent = modalToolbar,
+	})
+
+	local deleteTextBtn = create("TextButton", {
+		Name = "DeleteTextBtn",
+		BackgroundTransparency = 1,
+		Font = Constants.Fonts.Regular,
+		Text = "🗑️",
+		TextColor3 = Color3.fromRGB(255, 59, 48),
+		TextSize = 14,
+		Position = UDim2.new(0.7, 0, 0.15, 0),
+		Size = UDim2.new(0.25, 0, 0.7, 0),
+		ZIndex = 104,
+		Parent = modalToolbar,
+	})
+
+	local currentActivePhotoId: string? = nil
+
+	local function closePhotoModal()
 		photoModal.Visible = false
+		currentActivePhotoId = nil
+		fullViewport:ClearAllChildren()
 	end
-	
-	modalBackBtn.Activated:Connect(closePhoto)
 
-	local function loadPhotos()
+	modalBackBtn.Activated:Connect(closePhotoModal)
+
+	-- Handle photo deletion
+	local function deleteCurrentPhoto()
+		if not currentActivePhotoId or not photoService then return end
+		local targetId = currentActivePhotoId
+		photoService:DeletePhoto(targetId)
+		closePhotoModal()
+		loadPhotosGrid()
+	end
+
+	deleteTextBtn.Activated:Connect(deleteCurrentPhoto)
+	deleteBtn.Activated:Connect(deleteCurrentPhoto)
+
+	-- ─── LOAD & RENDER PHOTOS GRID ───────────────────────────────
+
+	function loadPhotosGrid()
+		-- Clear grid entries
 		for _, child in ipairs(scrollFrame:GetChildren()) do
-			if child:IsA("ImageButton") then
-				child:Destroy()
-			end
-		end
-		for _, child in ipairs(pageContainer:GetChildren()) do
-			if child:IsA("Frame") then
+			if child:IsA("TextButton") or child:IsA("Frame") then
 				child:Destroy()
 			end
 		end
 
-		local photos = saveService:Get("Photos", {})
+		local photos = photoService and photoService:GetPhotos() or {}
 
-		table.sort(photos, function(a, b)
-			return (a.Timestamp or 0) < (b.Timestamp or 0)
-		end)
+		if #photos == 0 then
+			emptyStateLabel.Visible = true
+			return
+		else
+			emptyStateLabel.Visible = false
+		end
 
 		for i, photoData in ipairs(photos) do
-			local imgUrl = getPhotoThumbnail(photoData, player)
-			
-			local btn = create("ImageButton", {
-				Name = "Photo_" .. i,
-				BackgroundColor3 = Color3.fromRGB(230, 230, 230),
+			local cellBtn = create("TextButton", {
+				Name = "PhotoCell_" .. (photoData.Id or i),
+				AutoButtonColor = true,
+				BackgroundColor3 = Color3.fromRGB(20, 20, 25),
 				BorderSizePixel = 0,
-				Image = imgUrl,
-				ScaleType = Enum.ScaleType.Crop,
-				LayoutOrder = i,
+				LayoutOrder = i, -- Terurut 1, 2, 3 (terbaru paling depan karena photos disort desending)
+				Text = "",
+				ClipsDescendants = true,
 				Parent = scrollFrame,
 			})
-			
-			local page = create("Frame", {
-				Name = "Page_" .. i,
+
+			local cellViewport = create("ViewportFrame", {
+				Name = "Viewport",
 				BackgroundTransparency = 1,
 				Size = UDim2.fromScale(1, 1),
-				LayoutOrder = i,
-				Parent = pageContainer,
+				ZIndex = 2,
+				Parent = cellBtn,
 			})
-			
-			local dateVal = Instance.new("StringValue")
-			dateVal.Name = "DateInfo"
-			dateVal.Value = photoData.Time or "Today"
-			dateVal.Parent = page
-			
-			local fullImg = create("ImageLabel", {
-				Name = "Image",
-				BackgroundTransparency = 1,
-				Image = imgUrl,
-				Size = UDim2.fromScale(1, 1),
-				ScaleType = Enum.ScaleType.Fit,
-				Parent = page,
-			})
-			
-			btn.Activated:Connect(function()
+
+			-- Render photo thumbnail ke ViewportFrame
+			if photoService then
+				photoService:RenderPhotoToViewport(cellViewport, photoData)
+			end
+
+			-- Open Fullscreen Photo Viewer saat diklik
+			cellBtn.Activated:Connect(function()
+				currentActivePhotoId = photoData.Id
+				modalDateTitle.Text = photoData.TimeFormatted or "Photo"
 				photoModal.Visible = true
-				pageLayout:JumpTo(page)
-				modalDateText.Text = dateVal.Value
+				if photoService then
+					photoService:RenderPhotoToViewport(fullViewport, photoData)
+				end
 			end)
 		end
 	end
 
-	loadPhotos()
-	
-	-- Refresh fotos saat app dibuka
+	-- Listen for photo changes
+	if photoService then
+		photoService.PhotosChanged:Connect(function()
+			if rootFrame.Visible then
+				loadPhotosGrid()
+			end
+		end)
+	end
+
+	-- Refresh grid saat app dibuka
 	rootFrame:GetPropertyChangedSignal("Visible"):Connect(function()
 		if rootFrame.Visible then
-			loadPhotos()
+			loadPhotosGrid()
 		end
 	end)
-	
+
+	loadPhotosGrid()
+
 	return rootFrame
 end
 

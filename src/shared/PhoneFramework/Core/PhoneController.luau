@@ -12,6 +12,7 @@ local PlayerArmAnimation = require(script.Parent:WaitForChild("PlayerArmAnimatio
 local CameraService = require(root:WaitForChild("Services"):WaitForChild("CameraService"))
 local AudioService = require(root:WaitForChild("Services"):WaitForChild("AudioService"))
 local SaveService = require(root:WaitForChild("Services"):WaitForChild("SaveService"))
+local PhotoService = require(root:WaitForChild("Services"):WaitForChild("PhotoService"))
 
 local PhoneController = {}
 PhoneController.__index = PhoneController
@@ -30,6 +31,8 @@ function PhoneController.new()
 	local device = IPhone5Device.new(gui)
 	local animator = AnimationController.new(device)
 
+	local saveService = SaveService.new()
+
 	local self = setmetatable({
 		_player = player,
 		_gui = gui,
@@ -38,11 +41,13 @@ function PhoneController.new()
 		_armAnim = PlayerArmAnimation.new(),
 		_opened = false,
 		_locked = true,
+		_autoCloseNotif = false,
 		_remote = ReplicatedStorage:WaitForChild(Constants.RemoteName, 10),
 		_services = {
 			CameraService = CameraService.new(),
 			AudioService = AudioService.new(),
-			SaveService = SaveService.new(),
+			SaveService = saveService,
+			PhotoService = PhotoService.new(saveService),
 		},
 	}, PhoneController)
 
@@ -88,6 +93,77 @@ function PhoneController.new()
 			end
 		end
 	end)
+
+	local function resolveContactName(phone: string?, fallbackName: string?): string
+		local rawPhone = phone or fallbackName or ""
+		local targetClean = string.gsub(rawPhone, "[%s%-]", "")
+		if targetClean == "" then return rawPhone end
+
+		local saveSvc = self._services and self._services.SaveService
+		local contacts = if saveSvc then saveSvc:Get("Contacts", {}) else {}
+		for _, c in ipairs(contacts) do
+			local cPhone = string.gsub(c.Phone or "", "[%s%-]", "")
+			if cPhone == targetClean and c.Name and c.Name ~= "" then
+				return c.Name
+			end
+		end
+		return rawPhone
+	end
+
+	if self._remote and self._remote:IsA("RemoteEvent") then
+		self._remote.OnClientEvent:Connect(function(action: string, payload: any)
+			if action == "LoadPhoneData" and payload then
+				if self._services and self._services.SaveService then
+					self._services.SaveService:LoadData(payload)
+				end
+			elseif action == "ReceiveAirDropContact" and payload then
+				self:SendNotification({
+					AppId = "contacts",
+					AppName = "Contacts",
+					AppIcon = "rbxassetid://114778546922350",
+					Title = "📡 AirDrop Contact Received",
+					Body = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " sent a contact via AirDrop.",
+					Duration = 5,
+				})
+			elseif action == "IncomingCall" and payload then
+				local callerDisp = resolveContactName(payload.callerPhone, payload.callerName)
+				self:SendNotification({
+					AppId = "phone",
+					AppName = "Phone",
+					AppIcon = "rbxassetid://71727318918905",
+					Title = "📞 Incoming Call",
+					Body = callerDisp .. " is calling you...",
+					Duration = 6,
+				})
+				-- Requirement 3: Incoming Call Auto Opens Phone
+				if not self._opened then
+					self:Open()
+				end
+				self._locked = false
+				self._autoCloseNotif = false
+				if self._inputManager then
+					self._inputManager:SetButtonVisualState(true)
+				end
+				self._appManager:Open("phone")
+
+			elseif action == "ReceiveSMS" and payload then
+				local senderDisp = resolveContactName(payload.senderPhone, payload.senderName)
+				self:SendNotification({
+					AppId = "messages",
+					AppName = "Messages",
+					AppIcon = "rbxassetid://108650574179237",
+					Title = "💬 New Message",
+					Body = senderDisp .. ": " .. (payload.messageText or ""),
+					Duration = 5,
+				})
+			end
+		end)
+
+		-- Minta data telepon yang tersimpan di DataStore server saat pertama kali muat
+		task.defer(function()
+			self._remote:FireServer("RequestPhoneData")
+		end)
+	end
 
 	return self
 end
@@ -150,6 +226,7 @@ function PhoneController:Lock()
 end
 
 function PhoneController:Unlock()
+	self._autoCloseNotif = false
 	if not self._opened then
 		return
 	end
@@ -162,6 +239,7 @@ function PhoneController:Unlock()
 end
 
 function PhoneController:OpenApp(appId: string)
+	self._autoCloseNotif = false
 	if not self._opened then
 		self:Open()
 	end
@@ -174,6 +252,7 @@ function PhoneController:OpenApp(appId: string)
 end
 
 function PhoneController:CloseCurrentApp()
+	self._autoCloseNotif = false
 	if self._locked then
 		return
 	end
@@ -181,7 +260,52 @@ function PhoneController:CloseCurrentApp()
 end
 
 function PhoneController:SendNotification(notification: any)
-	self._notifications:Send(notification)
+	-- Cek apakah HP sedang dibuka & pemain sedang di aplikasi penerima event
+	-- Gunakan _currentAppId langsung (AppManager tidak punya GetCurrentAppId)
+	local currentApp = ""
+	if self._opened and not self._locked and self._appManager then
+		currentApp = string.lower(self._appManager._currentAppId or "")
+	end
+
+	local notifApp = string.lower(notification.AppId or notification.App or "")
+
+	-- Kontekstual: Jika pemain sedang AKTIF di aplikasi yang menerima event tersebut,
+	-- jangan tampilkan banner (informasi sudah terlihat langsung di dalam aplikasi).
+	-- Tapi tetap tampilkan jika di Home Screen (currentApp == "home") atau aplikasi lain.
+	if self._opened and not self._locked
+		and notifApp ~= ""
+		and currentApp ~= ""
+		and currentApp ~= "home"
+		and currentApp == notifApp
+	then
+		return
+	end
+
+	local wereClosed = not self._opened
+
+	if wereClosed then
+		self:Open()
+		self._autoCloseNotif = true
+	end
+
+	self._notifications:Send(
+		notification,
+		function(wasClicked: boolean)
+			if wasClicked then
+				self._autoCloseNotif = false
+				if notification.AppId then
+					self:Unlock()
+					self:OpenApp(notification.AppId)
+				end
+			end
+		end,
+		function()
+			if self._autoCloseNotif and self._opened then
+				self._autoCloseNotif = false
+				self:Close()
+			end
+		end
+	)
 end
 
 function PhoneController:IsOpened()
