@@ -12,6 +12,7 @@ local PlayerArmAnimation = require(script.Parent:WaitForChild("PlayerArmAnimatio
 local CameraService = require(root:WaitForChild("Services"):WaitForChild("CameraService"))
 local AudioService = require(root:WaitForChild("Services"):WaitForChild("AudioService"))
 local SaveService = require(root:WaitForChild("Services"):WaitForChild("SaveService"))
+local PhotoService = require(root:WaitForChild("Services"):WaitForChild("PhotoService"))
 
 local PhoneController = {}
 PhoneController.__index = PhoneController
@@ -30,6 +31,8 @@ function PhoneController.new()
 	local device = IPhone5Device.new(gui)
 	local animator = AnimationController.new(device)
 
+	local saveService = SaveService.new()
+
 	local self = setmetatable({
 		_player = player,
 		_gui = gui,
@@ -43,7 +46,8 @@ function PhoneController.new()
 		_services = {
 			CameraService = CameraService.new(),
 			AudioService = AudioService.new(),
-			SaveService = SaveService.new(),
+			SaveService = saveService,
+			PhotoService = PhotoService.new(saveService),
 		},
 	}, PhoneController)
 

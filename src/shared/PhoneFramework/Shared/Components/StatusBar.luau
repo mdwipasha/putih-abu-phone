@@ -5,15 +5,16 @@ local create = require(script.Parent.Parent.Utilities.Create)
 
 local StatusBar = {}
 
-function StatusBar.new(parent: Instance, options: { Light: boolean?, Carrier: string?, Battery: string? }?)
+function StatusBar.new(parent: Instance, options: { Light: boolean?, Carrier: string?, Battery: string?, ZIndex: number? }?)
 	options = options or {}
 	local textColor = if options.Light == false then Color3.fromRGB(20, 20, 20) else Color3.fromRGB(255, 255, 255)
+	local baseZIndex = options.ZIndex or 100
 
 	local bar = create("Frame", {
 		Name = "StatusBar",
 		BackgroundTransparency = 1,
 		Size = UDim2.fromScale(1, Constants.Screen.StatusBarHeight),
-		ZIndex = 40,
+		ZIndex = baseZIndex,
 		Parent = parent,
 	})
 
