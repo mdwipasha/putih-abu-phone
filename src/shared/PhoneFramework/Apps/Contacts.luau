@@ -103,13 +103,82 @@ local function iconImage(props: { [string]: any })
 	return create("ImageLabel", defaults)
 end
 
-local function getAvatarUrl(contactData: any): string
+local AVATAR_COLORS = {
+	Color3.fromRGB(0, 122, 255),  -- Blue
+	Color3.fromRGB(52, 199, 89),  -- Green
+	Color3.fromRGB(255, 149, 0),  -- Orange
+	Color3.fromRGB(175, 82, 222), -- Purple
+	Color3.fromRGB(255, 45, 85),  -- Pink
+	Color3.fromRGB(88, 86, 214),  -- Indigo
+}
+
+local function isPlayerOnline(contactData: any): boolean
+	if contactData.IsSelf then return true end
 	if contactData.UserId and tonumber(contactData.UserId) then
-		return "rbxthumb://type=AvatarBust&id=" .. contactData.UserId .. "&w=150&h=150"
-	elseif contactData.Avatar and contactData.Avatar ~= "" then
-		return contactData.Avatar
+		local p = Players:GetPlayerByUserId(tonumber(contactData.UserId))
+		return p ~= nil
 	end
-	return ICONS.AvatarFallback
+	return false
+end
+
+local function renderAvatarWidget(props: {
+	Parent: Instance,
+	Contact: any,
+	SizeOffset: number,
+	Position: UDim2,
+	AnchorPoint: Vector2?,
+	ZIndex: number?,
+})
+	local contact = props.Contact
+	local sizeOffset = props.SizeOffset or 36
+	local isOnline = isPlayerOnline(contact)
+	local borderColor = if isOnline then COLORS.AccentGreen else COLORS.DestructiveRed
+	local zIndex = props.ZIndex or 54
+
+	local avatarFrame = create("Frame", {
+		Name = "AvatarFrame",
+		BackgroundColor3 = Color3.fromRGB(235, 238, 245),
+		Position = props.Position or UDim2.new(0, 10, 0.5, 0),
+		AnchorPoint = props.AnchorPoint or Vector2.new(0, 0.5),
+		Size = UDim2.fromOffset(sizeOffset, sizeOffset),
+		ZIndex = zIndex,
+		Parent = props.Parent,
+	})
+	rounded(avatarFrame, math.floor(sizeOffset / 2))
+	stroke(avatarFrame, borderColor, 2)
+
+	if contact.UserId and tonumber(contact.UserId) then
+		local img = create("ImageLabel", {
+			Name = "AvatarImg",
+			BackgroundTransparency = 1,
+			Image = "rbxthumb://type=AvatarBust&id=" .. contact.UserId .. "&w=150&h=150",
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = zIndex + 1,
+			Parent = avatarFrame,
+		})
+		rounded(img, math.floor(sizeOffset / 2))
+	else
+		-- Fallback Initial Name Letter
+		local nameStr = contact.Name or "K"
+		local initial = string.upper(string.sub(nameStr, 1, 1))
+		local colorIdx = ((string.byte(initial) or 65) % #AVATAR_COLORS) + 1
+		avatarFrame.BackgroundColor3 = AVATAR_COLORS[colorIdx]
+
+		label({
+			Name = "InitialLabel",
+			Parent = avatarFrame,
+			Font = Constants.Fonts.Semibold,
+			Text = initial,
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextXAlignment = Enum.TextXAlignment.Center,
+			Size = UDim2.fromScale(1, 1),
+			MaxTextSize = math.floor(sizeOffset * 0.48),
+			MinTextSize = 8,
+			ZIndex = zIndex + 1,
+		})
+	end
+
+	return avatarFrame
 end
 
 local ContactsApp = {
@@ -435,17 +504,14 @@ function ContactsApp.Create(context: any)
 		rounded(card, 12)
 		stroke(card, COLORS.CardStroke, 1)
 
-		local avatarFrame = create("ImageLabel", {
-			Name = "Avatar",
-			BackgroundColor3 = Color3.fromRGB(230, 235, 245),
-			Image = "rbxthumb://type=AvatarBust&id=" .. localPlayer.UserId .. "&w=150&h=150",
+		renderAvatarWidget({
+			Parent = card,
+			Contact = { UserId = localPlayer.UserId, Name = localPlayer.DisplayName, IsSelf = true },
+			SizeOffset = 42,
 			Position = UDim2.new(0, 10, 0.5, 0),
 			AnchorPoint = Vector2.new(0, 0.5),
-			Size = UDim2.fromOffset(42, 42),
 			ZIndex = 54,
-			Parent = card,
 		})
-		rounded(avatarFrame, 21)
 
 		label({
 			Name = "Name",
@@ -552,19 +618,15 @@ function ContactsApp.Create(context: any)
 			rounded(row, 10)
 			stroke(row, COLORS.CardStroke, 1)
 
-			-- Avatar Image
-			local avatar = getAvatarUrl(contact)
-			local avatarImg = create("ImageLabel", {
-				Name = "Avatar",
-				BackgroundColor3 = Color3.fromRGB(235, 238, 245),
-				Image = avatar,
+			-- Avatar Image (with Online/Offline border & initial fallback)
+			renderAvatarWidget({
+				Parent = row,
+				Contact = contact,
+				SizeOffset = 36,
 				Position = UDim2.new(0, 10, 0.5, 0),
 				AnchorPoint = Vector2.new(0, 0.5),
-				Size = UDim2.fromOffset(36, 36),
 				ZIndex = 54,
-				Parent = row,
 			})
-			rounded(avatarImg, 18)
 
 			-- Name
 			label({
@@ -804,17 +866,14 @@ function ContactsApp.Create(context: any)
 			rounded(card, 10)
 			stroke(card, COLORS.CardStroke, 1)
 
-			local avatar = create("ImageLabel", {
-				Name = "Avatar",
-				BackgroundColor3 = Color3.fromRGB(230, 235, 245),
-				Image = "rbxthumb://type=AvatarBust&id=" .. target.UserId .. "&w=150&h=150",
+			renderAvatarWidget({
+				Parent = card,
+				Contact = { UserId = target.UserId, Name = target.DisplayName },
+				SizeOffset = 38,
 				Position = UDim2.new(0, 10, 0.5, 0),
 				AnchorPoint = Vector2.new(0, 0.5),
-				Size = UDim2.fromOffset(38, 38),
 				ZIndex = 55,
-				Parent = card,
 			})
-			rounded(avatar, 19)
 
 			label({
 				Name = "Name",
@@ -847,17 +906,25 @@ function ContactsApp.Create(context: any)
 				AutoButtonColor = true,
 				BackgroundColor3 = COLORS.AccentGreen,
 				BorderSizePixel = 0,
-				Font = Constants.Fonts.Semibold,
-				Text = "Kirim Kontak",
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 11,
+				Text = "",
 				AnchorPoint = Vector2.new(1, 0.5),
 				Position = UDim2.new(1, -10, 0.5, 0),
-				Size = UDim2.new(0, 85, 0, 30),
+				Size = UDim2.fromOffset(30, 30),
 				ZIndex = 55,
 				Parent = card,
 			})
 			rounded(sendAirDropBtn, 15)
+
+			iconImage({
+				Name = "Icon",
+				Image = ICONS.AirDrop,
+				ImageColor3 = Color3.fromRGB(255, 255, 255),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromOffset(16, 16),
+				ZIndex = 56,
+				Parent = sendAirDropBtn,
+			})
 
 			sendAirDropBtn.Activated:Connect(function()
 				local myPhone = EconomyAdapter.GetPhoneNumber()
@@ -927,20 +994,15 @@ function ContactsApp.Create(context: any)
 			modalOverlay.Visible = false
 		end)
 
-		-- Avatar Ringkas
-		local avatar = getAvatarUrl(contact)
-		local avatarImg = create("ImageLabel", {
-			Name = "Avatar",
-			BackgroundColor3 = Color3.fromRGB(235, 238, 245),
-			Image = avatar,
-			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, 0, 0, 6),
-			Size = UDim2.fromOffset(52, 52),
-			ZIndex = 102,
+		-- Avatar Ringkas (with Online/Offline border & initial fallback)
+		renderAvatarWidget({
 			Parent = card,
+			Contact = contact,
+			SizeOffset = 52,
+			Position = UDim2.new(0.5, 0, 0, 6),
+			AnchorPoint = Vector2.new(0.5, 0),
+			ZIndex = 102,
 		})
-		rounded(avatarImg, 26)
-		stroke(avatarImg, COLORS.AccentBlue, 2)
 
 		-- Name & Phone
 		label({
@@ -1473,7 +1535,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = COLORS.AccentGreen,
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "Terima & Simpan",
+			Text = "Terima",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 12,
 			Position = UDim2.new(0.52, 0, 1, -44),
@@ -1583,10 +1645,20 @@ function ContactsApp.Create(context: any)
 		end
 	end)
 
+	-- Real-time player online/offline status listener
+	local playerJoinedConn = Players.PlayerAdded:Connect(function()
+		if rootFrame.Visible then updateContactsList() end
+	end)
+	local playerLeftConn = Players.PlayerRemoving:Connect(function()
+		if rootFrame.Visible then updateContactsList() end
+	end)
+
 	rootFrame.Destroying:Connect(function()
 		if remoteConnection then remoteConnection:Disconnect() end
 		if radarLoopConnection then radarLoopConnection:Disconnect() end
 		if saveConnection then saveConnection:Disconnect() end
+		if playerJoinedConn then playerJoinedConn:Disconnect() end
+		if playerLeftConn then playerLeftConn:Disconnect() end
 	end)
 
 	-- Initial Render

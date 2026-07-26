@@ -346,7 +346,7 @@ function MessagesApp.Create(context: any)
 		TextSize = 12,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Position = UDim2.new(0.04, 0, 0.15, 0),
-		Size = UDim2.new(0.76, 0, 0.7, 0),
+		Size = UDim2.new(0.81, 0, 0.7, 0),
 		ZIndex = 55,
 		Parent = inputBar,
 	})
@@ -360,16 +360,16 @@ function MessagesApp.Create(context: any)
 		BackgroundColor3 = COLORS.AccentGreen,
 		BorderSizePixel = 0,
 		Font = Constants.Fonts.Semibold,
-		Text = "Kirim",
+		Text = "▲",
 		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextSize = 11,
+		TextSize = 13,
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(0.96, 0, 0.5, 0),
-		Size = UDim2.new(0.14, 0, 0.7, 0),
+		Position = UDim2.new(1, -8, 0.5, 0),
+		Size = UDim2.fromOffset(30, 30),
 		ZIndex = 55,
 		Parent = inputBar,
 	})
-	rounded(sendBtn, 16)
+	rounded(sendBtn, 15)
 
 	-- MODAL SELECTOR PESAN BARU
 	local composeModal = create("Frame", {
@@ -508,7 +508,7 @@ function MessagesApp.Create(context: any)
 		composeBtn.Visible = false
 		callHeaderBtn.Visible = true
 		titleLabel.Text = thread.PartnerName or thread.PartnerPhone or "Pesan"
-		backBtn.Text = "く Pesan"
+		backBtn.Text = "く"
 
 		for _, child in ipairs(chatMessagesScroll:GetChildren()) do
 			if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ImageLabel") then
@@ -540,33 +540,35 @@ function MessagesApp.Create(context: any)
 				Parent = row,
 			})
 			rounded(bubble, 14)
-			padded(bubble, 0, 0, 0, 0)
+			stroke(bubble, if isOut then Color3.fromRGB(42, 185, 75) else Color3.fromRGB(215, 215, 220), 1)
 
-			create("UISizeConstraint", {
-				MaxSize = Vector2.new(210, 1000),
-				MinSize = Vector2.new(40, 26),
+			create("UIPadding", {
+				PaddingLeft = UDim.new(0, 11),
+				PaddingRight = UDim.new(0, 11),
+				PaddingTop = UDim.new(0, 7),
+				PaddingBottom = UDim.new(0, 7),
 				Parent = bubble,
 			})
 
-			local msgText = create("TextLabel", {
+			create("UISizeConstraint", {
+				MaxSize = Vector2.new(205, 1000),
+				MinSize = Vector2.new(24, 24),
+				Parent = bubble,
+			})
+
+			label({
 				Name = "Text",
-				BackgroundTransparency = 1,
+				Parent = bubble,
 				Font = Constants.Fonts.Regular,
 				Text = msg.Text or "",
 				TextColor3 = if isOut then COLORS.TextOutgoing else COLORS.TextIncoming,
 				TextSize = 12,
 				TextWrapped = true,
+				TextScaled = false,
+				TextXAlignment = Enum.TextXAlignment.Left,
 				AutomaticSize = Enum.AutomaticSize.XY,
+				Size = UDim2.new(0, 0, 0, 0),
 				ZIndex = 56,
-				Parent = bubble,
-			})
-			padded(msgText, 0, 0, 0, 0)
-			create("UIPadding", {
-				PaddingLeft = UDim.new(0, 10),
-				PaddingRight = UDim.new(0, 10),
-				PaddingTop = UDim.new(0, 6),
-				PaddingBottom = UDim.new(0, 6),
-				Parent = bubble,
 			})
 		end
 
@@ -615,7 +617,7 @@ function MessagesApp.Create(context: any)
 			composeBtn.Visible = true
 			callHeaderBtn.Visible = false
 			titleLabel.Text = "Messages"
-			backBtn.Text = "く Home"
+			backBtn.Text = "く"
 			renderThreadList()
 		else
 			context.CloseCurrentApp()

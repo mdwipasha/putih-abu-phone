@@ -350,15 +350,16 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 					targetUserId = targetPlayer.UserId,
 					targetName = targetName,
 					targetPhone = targetPhone,
+					isOnline = true,
 				})
 			elseif targetPhoneStr ~= "" and targetPhoneStr:match("^%d+$") and #targetPhoneStr >= 4 then
-				-- Number looks valid but player is offline: allow call to ring
-				-- The caller's screen will show "Memanggil..." until they give up
+				-- Number looks valid but player is offline: allow call to ring ("Memanggil...")
 				local displayNum = value.targetPhone or targetPhoneStr
 				remote:FireClient(player, "CallRinging", {
 					targetUserId = nil,
 					targetName = displayNum,
 					targetPhone = targetPhoneStr,
+					isOnline = false,
 				})
 			else
 				-- Number is empty, non-numeric, or clearly invalid

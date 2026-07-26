@@ -698,7 +698,7 @@ function PhoneApp.Create(context: any)
 		BackgroundColor3 = Color3.fromRGB(40, 48, 60),
 		Image = ICONS.AvatarFallback,
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0.12, 0),
+		Position = UDim2.new(0.5, 0, 0.1, 0),
 		Size = UDim2.fromOffset(80, 80),
 		ZIndex = 101,
 		Parent = activeCallOverlay,
@@ -1028,7 +1028,7 @@ function PhoneApp.Create(context: any)
 
 				state.CallPartner = { name = tName, phone = tPhone, userId = tUserId }
 				callPartnerName.Text = tName
-				callStatusLabel.Text = "Memanggil..."
+				callStatusLabel.Text = if payload.isOnline then "Berdering..." else "Memanggil..."
 				if tUserId then
 					callAvatar.Image = "rbxthumb://type=AvatarBust&id=" .. tUserId .. "&w=150&h=150"
 				else
