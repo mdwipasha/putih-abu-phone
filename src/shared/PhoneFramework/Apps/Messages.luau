@@ -130,7 +130,7 @@ function MessagesApp.Create(context: any)
 		local rawPhone = phone or fallbackPhone or ""
 		local targetClean = cleanPhoneStr(rawPhone)
 		if targetClean == "" then
-			return rawPhone ~= "" and rawPhone or "Pesan"
+			return rawPhone ~= "" and rawPhone or "Message"
 		end
 
 		local contacts = saveService:Get("Contacts", {})
@@ -365,7 +365,7 @@ function MessagesApp.Create(context: any)
 		ClearTextOnFocus = false,
 		Font = Constants.Fonts.Regular,
 		PlaceholderColor3 = COLORS.TextMuted,
-		PlaceholderText = "Tulis pesan...",
+		PlaceholderText = "Type a message...",
 		Text = "",
 		TextColor3 = COLORS.TextDark,
 		TextSize = 12,
@@ -432,7 +432,7 @@ function MessagesApp.Create(context: any)
 		end
 
 		if #filtered == 0 then
-			local emptyText = if state.SearchQuery ~= "" then "Tidak ditemukan percakapan dengan kata kunci tersebut." else "Belum ada percakapan.\nTekan ✎ untuk membuat pesan baru."
+			local emptyText = if state.SearchQuery ~= "" then "No conversations found matching keyword." else "No conversations yet.\nTap ✎ to start a new chat."
 			label({
 				Parent = threadScroll,
 				Font = Constants.Fonts.Regular,
@@ -491,7 +491,7 @@ function MessagesApp.Create(context: any)
 				ZIndex = 55,
 			})
 
-			local previewText = if lastMsg then lastMsg.Text else "Belum ada pesan."
+			local previewText = if lastMsg then lastMsg.Text else "No messages yet."
 			label({
 				Name = "Preview",
 				Parent = card,
@@ -707,7 +707,7 @@ function MessagesApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "✎ Pesan Baru",
+			Text = "✎ New Message",
 			TextColor3 = COLORS.TextDark,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.new(0, 0, 0, 4),
@@ -721,7 +721,7 @@ function MessagesApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "NOMOR HP / PENERIMA",
+			Text = "RECIPIENT / PHONE NUMBER",
 			TextColor3 = COLORS.TextMuted,
 			Position = UDim2.new(0, 0, 0, 26),
 			Size = UDim2.new(1, 0, 0, 12),
@@ -737,7 +737,7 @@ function MessagesApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Ketik Nomor HP...",
+			PlaceholderText = "Enter Phone Number...",
 			Text = "",
 			TextColor3 = COLORS.TextDark,
 			TextSize = 11,
@@ -757,7 +757,7 @@ function MessagesApp.Create(context: any)
 			BackgroundColor3 = Color3.fromRGB(235, 245, 255),
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "👤 Kontak",
+			Text = "👤 Contact",
 			TextColor3 = COLORS.AccentBlue,
 			TextSize = 10,
 			Position = UDim2.new(0.73, 0, 0, 40),
@@ -772,7 +772,7 @@ function MessagesApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "ISI PESAN",
+			Text = "MESSAGE CONTENT",
 			TextColor3 = COLORS.TextMuted,
 			Position = UDim2.new(0, 0, 0, 74),
 			Size = UDim2.new(1, 0, 0, 12),
@@ -788,7 +788,7 @@ function MessagesApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Tulis isi pesan...",
+			PlaceholderText = "Type message content...",
 			Text = "",
 			TextColor3 = COLORS.TextDark,
 			TextSize = 11,
@@ -864,7 +864,7 @@ function MessagesApp.Create(context: any)
 			label({
 				Parent = pickerCard,
 				Font = Constants.Fonts.Semibold,
-				Text = "Pilih Kontak",
+				Text = "Select Contact",
 				TextColor3 = COLORS.TextDark,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Position = UDim2.new(0, 0, 0, 4),
@@ -912,7 +912,7 @@ function MessagesApp.Create(context: any)
 				label({
 					Parent = pickerScroll,
 					Font = Constants.Fonts.Regular,
-					Text = "Belum ada kontak tersimpan.",
+					Text = "No contacts saved.",
 					TextColor3 = COLORS.TextMuted,
 					TextXAlignment = Enum.TextXAlignment.Center,
 					TextWrapped = true,
@@ -989,7 +989,7 @@ function MessagesApp.Create(context: any)
 			local msgVal = string.gsub(contentBox.Text, "^%s*(.-)%s*$", "%1")
 
 			if targetVal == "" or msgVal == "" then
-				context.SendNotification({ Title = "⚠️ Peringatan", Text = "Penerima dan isi pesan wajib diisi!", Duration = 3 })
+				context.SendNotification({ Title = "⚠️ Warning", Text = "Recipient and message content are required!", Duration = 3 })
 				return
 			end
 

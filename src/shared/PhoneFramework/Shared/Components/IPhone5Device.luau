@@ -36,11 +36,43 @@ function IPhone5Device.new(parent: Instance)
 		DominantAxis = Enum.DominantAxis.Height,
 		Parent = root,
 	})
-	create("UISizeConstraint", {
+
+	local sizeConstraint = create("UISizeConstraint", {
 		MinSize = Vector2.new(0, Constants.Device.MinHeight),
 		MaxSize = Vector2.new(10000, Constants.Device.MaxHeight),
 		Parent = root,
 	})
+
+	local currentCam = workspace.CurrentCamera
+	local function updateResponsiveSizing()
+		if not currentCam then return end
+		local viewport = currentCam.ViewportSize
+		local w, h = viewport.X, viewport.Y
+
+		if w > 0 and h > 0 then
+			if w < 650 or h < 600 then
+				-- Mobile / Small Screen: Perluas ukuran HP agar lega
+				root.Size = UDim2.fromScale(0.65, 0.88)
+				sizeConstraint.MinSize = Vector2.new(0, math.min(380, h * 0.75))
+				sizeConstraint.MaxSize = Vector2.new(10000, math.min(740, h * 0.90))
+			elseif w < 1024 then
+				-- Tablet Screen
+				root.Size = UDim2.fromScale(0.36, 0.82)
+				sizeConstraint.MinSize = Vector2.new(0, 440)
+				sizeConstraint.MaxSize = Vector2.new(10000, 720)
+			else
+				-- Desktop Screen
+				root.Size = Constants.Device.Size
+				sizeConstraint.MinSize = Vector2.new(0, Constants.Device.MinHeight)
+				sizeConstraint.MaxSize = Vector2.new(10000, Constants.Device.MaxHeight)
+			end
+		end
+	end
+
+	updateResponsiveSizing()
+	if currentCam then
+		currentCam:GetPropertyChangedSignal("ViewportSize"):Connect(updateResponsiveSizing)
+	end
 
 	local shadow = create("Frame", {
 		Name = "Shadow",

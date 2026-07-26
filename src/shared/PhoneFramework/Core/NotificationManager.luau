@@ -17,18 +17,18 @@ local function resolveAppMeta(notification: any)
 	local appId = string.lower(notification.AppId or notification.App or "")
 	local title = notification.Title or ""
 
-	if appId == "bank" or title:find("Bank") or title:find("Uang") or title:find("Transfer") or title:find("Saldo") then
+	if appId == "bank" or title:find("Bank") or title:find("Money") or title:find("Transfer") or title:find("Balance") or title:find("Uang") or title:find("Saldo") then
 		return DEFAULT_APP_ICONS.bank
-	elseif appId == "phone" or title:find("Panggilan") or title:find("Telepon") or title:find("📞") or title:find("Nomor") then
+	elseif appId == "phone" or title:find("Phone") or title:find("Call") or title:find("Dial") or title:find("Panggilan") or title:find("Telepon") or title:find("📞") then
 		return DEFAULT_APP_ICONS.phone
-	elseif appId == "messages" or title:find("Pesan") or title:find("SMS") or title:find("💬") then
+	elseif appId == "messages" or title:find("Messages") or title:find("Message") or title:find("SMS") or title:find("Pesan") or title:find("💬") then
 		return DEFAULT_APP_ICONS.messages
-	elseif appId == "contacts" or title:find("Kontak") or title:find("AirDrop") or title:find("📡") then
+	elseif appId == "contacts" or title:find("Contacts") or title:find("Contact") or title:find("AirDrop") or title:find("Kontak") or title:find("📡") then
 		return DEFAULT_APP_ICONS.contacts
 	end
 
 	return {
-		Name = string.upper(notification.AppName or notification.App or "NOTIFIKASI"),
+		Name = string.upper(notification.AppName or notification.App or "NOTIFICATION"),
 		Icon = notification.AppIcon or notification.Icon or "rbxassetid://71727318918905",
 		Bg = notification.IconBg or Color3.fromRGB(18, 129, 91),
 	}
@@ -63,7 +63,7 @@ function NotificationManager:Send(
 
 	local meta = resolveAppMeta(notification)
 	local duration = notification.Duration or 4.5
-	local titleText = notification.Title or "Notifikasi"
+	local titleText = notification.Title or "Notification"
 	local bodyText = notification.Body or notification.Text or ""
 
 	-- iOS 7 White Banner Container
@@ -138,7 +138,7 @@ function NotificationManager:Send(
 		Name = "TimeTag",
 		BackgroundTransparency = 1,
 		Font = Enum.Font.SourceSans,
-		Text = "sekarang",
+		Text = "now",
 		TextColor3 = Color3.fromRGB(142, 142, 147),
 		TextSize = 10,
 		TextXAlignment = Enum.TextXAlignment.Right,

@@ -19,7 +19,7 @@ function Settings.Create(context: any)
 		saveService:Set("WallpaperImage", inputText)
 		context.SendNotification({
 			Title = "Wallpaper",
-			Body = "Wallpaper berhasil diganti.",
+			Body = "Wallpaper changed successfully.",
 		})
 	end
 

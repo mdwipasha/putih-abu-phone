@@ -329,8 +329,8 @@ function ContactsApp.Create(context: any)
 
 	local tabButtons = {}
 	local tabs = {
-		{ id = "all", name = "Semua Kontak" },
-		{ id = "airdrop", name = "AirDrop Contact" },
+		{ id = "all", name = "All Contacts" },
+		{ id = "airdrop", name = "AirDrop" },
 	}
 
 	local tabWidth = 1 / #tabs
@@ -591,7 +591,7 @@ function ContactsApp.Create(context: any)
 				Name = "EmptyLabel",
 				Parent = contactsScroll,
 				Font = Constants.Fonts.Regular,
-				Text = "Belum ada kontak tersimpan.",
+				Text = "No contacts saved.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Size = UDim2.new(1, 0, 0, 60),
@@ -633,7 +633,7 @@ function ContactsApp.Create(context: any)
 				Name = "Name",
 				Parent = row,
 				Font = Constants.Fonts.Semibold,
-				Text = contact.Name or "Kontak Tanpa Nama",
+				Text = contact.Name or "Unnamed Contact",
 				TextColor3 = COLORS.TextDark,
 				TextTruncate = Enum.TextTruncate.AtEnd,
 				Position = UDim2.new(0, 56, 0, 10),
@@ -687,8 +687,8 @@ function ContactsApp.Create(context: any)
 			})
 			callBtn.Activated:Connect(function()
 				context.SendNotification({
-					Title = "📞 Memanggil Kontak",
-					Text = "Memanggil " .. (contact.Name or "Kontak") .. " (" .. (contact.Phone or "") .. ")...",
+					Title = "📞 Calling Contact",
+					Text = "Calling " .. (contact.Name or "Contact") .. " (" .. (contact.Phone or "") .. ")...",
 					Duration = 4,
 				})
 			end)
@@ -840,7 +840,7 @@ function ContactsApp.Create(context: any)
 				Name = "Text",
 				Parent = emptyCard,
 				Font = Constants.Fonts.Regular,
-				Text = "Tidak ada player terdekat yang berada dalam radius zona AirDrop.",
+				Text = "No nearby players found within AirDrop zone radius.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Position = UDim2.fromScale(0, 0),
@@ -934,7 +934,7 @@ function ContactsApp.Create(context: any)
 				local contactPayload = {
 					Name = localPlayer.DisplayName,
 					Phone = myPhone,
-					Note = "Kontak via AirDrop",
+					Note = "AirDrop Contact",
 					UserId = localPlayer.UserId,
 				}
 
@@ -944,8 +944,8 @@ function ContactsApp.Create(context: any)
 						contactData = contactPayload,
 					})
 					context.SendNotification({
-						Title = "AirDrop Dikirim",
-						Text = "Mengirim kontak ke " .. target.DisplayName .. "...",
+						Title = "AirDrop Sent",
+						Text = "Sending contact to " .. target.DisplayName .. "...",
 						Duration = 3,
 					})
 				end
@@ -1114,15 +1114,15 @@ function ContactsApp.Create(context: any)
 			btn.Activated:Connect(callback)
 		end
 
-		makeActionButton("Call", "Panggil", ICONS.Phone, COLORS.AccentGreen, 1, function()
+		makeActionButton("Call", "Call", ICONS.Phone, COLORS.AccentGreen, 1, function()
 			context.SendNotification({
-				Title = "📞 Panggilan Telepon",
-				Text = "Memanggil " .. (contact.Name or "") .. "...",
+				Title = "📞 Phone Call",
+				Text = "Calling " .. (contact.Name or "") .. "...",
 				Duration = 3,
 			})
 		end)
 
-		makeActionButton("Msg", "Pesan", ICONS.Message, COLORS.AccentBlue, 2, function()
+		makeActionButton("Msg", "Message", ICONS.Message, COLORS.AccentBlue, 2, function()
 			modalOverlay.Visible = false
 			context.OpenApp("messages")
 		end)
@@ -1148,7 +1148,7 @@ function ContactsApp.Create(context: any)
 				BackgroundColor3 = COLORS.AccentBlue,
 				BorderSizePixel = 0,
 				Font = Constants.Fonts.Semibold,
-				Text = "Edit Kontak",
+				Text = "Edit Contact",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 11,
 				Position = UDim2.new(0, 0, 1, -34),
@@ -1169,7 +1169,7 @@ function ContactsApp.Create(context: any)
 				BackgroundColor3 = COLORS.DestructiveRed,
 				BorderSizePixel = 0,
 				Font = Constants.Fonts.Semibold,
-				Text = "Hapus Kontak",
+				Text = "Delete Contact",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextSize = 11,
 				Position = UDim2.new(0.52, 0, 1, -34),
@@ -1190,8 +1190,8 @@ function ContactsApp.Create(context: any)
 				modalOverlay.Visible = false
 				updateContactsList()
 				context.SendNotification({
-					Title = "🗑️ Kontak Dihapus",
-					Text = "Kontak " .. (contact.Name or "") .. " telah dihapus.",
+					Title = "🗑️ Contact Deleted",
+					Text = "Contact " .. (contact.Name or "") .. " has been deleted.",
 					Duration = 3,
 				})
 			end)
@@ -1224,7 +1224,7 @@ function ContactsApp.Create(context: any)
 			Name = "FormTitle",
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = if isEdit then "Edit Kontak" else "Tambah Kontak Baru",
+			Text = if isEdit then "Edit Contact" else "New Contact",
 			TextColor3 = COLORS.TextDark,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.new(0, 0, 0, 4),
@@ -1238,7 +1238,7 @@ function ContactsApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "NAMA KONTAK",
+			Text = "CONTACT NAME",
 			TextColor3 = COLORS.TextMuted,
 			Position = UDim2.new(0, 0, 0, 24),
 			Size = UDim2.new(1, 0, 0, 12),
@@ -1271,7 +1271,7 @@ function ContactsApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "NOMOR TELEPON",
+			Text = "PHONE NUMBER",
 			TextColor3 = COLORS.TextMuted,
 			Position = UDim2.new(0, 0, 0, 70),
 			Size = UDim2.new(1, 0, 0, 12),
@@ -1286,7 +1286,7 @@ function ContactsApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Contoh: 0812xxxx",
+			PlaceholderText = "e.g. 0812xxxx",
 			Text = if isEdit then (existingContact.Phone or "") else (if (existingContact and existingContact.Phone) then existingContact.Phone else ""),
 			TextColor3 = COLORS.TextDark,
 			TextSize = 11,
@@ -1304,7 +1304,7 @@ function ContactsApp.Create(context: any)
 		label({
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "CATATAN / HUBUNGAN",
+			Text = "NOTE / RELATIONSHIP",
 			TextColor3 = COLORS.TextMuted,
 			Position = UDim2.new(0, 0, 0, 116),
 			Size = UDim2.new(1, 0, 0, 12),
@@ -1319,7 +1319,7 @@ function ContactsApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Contoh: Teman Sekolah",
+			PlaceholderText = "e.g. School Friend",
 			Text = if isEdit then (existingContact.Note or "") else "",
 			TextColor3 = COLORS.TextDark,
 			TextSize = 11,
@@ -1340,7 +1340,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = Color3.fromRGB(235, 245, 255),
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "👤 Autofill dari Player Terdekat",
+			Text = "👤 Autofill from Nearby Player",
 			TextColor3 = COLORS.AccentBlue,
 			TextSize = 10,
 			Position = UDim2.new(0, 0, 0, 164),
@@ -1361,11 +1361,11 @@ function ContactsApp.Create(context: any)
 					if myHRP and targetHRP and (myHRP.Position - targetHRP.Position).Magnitude <= RADAR_RADIUS_STUDS then
 						nameBox.Text = target.DisplayName
 						phoneBox.Text = "08" .. string.sub(tostring(target.UserId * 73), 1, 8)
-						noteBox.Text = "Pemain Roblox (@" .. target.Name .. ")"
+						noteBox.Text = "Roblox Player (@" .. target.Name .. ")"
 						selectedUserId = target.UserId
 						context.SendNotification({
-							Title = "👤 AutoFill Kontak",
-							Text = "Mengisi data dari player " .. target.DisplayName,
+							Title = "👤 AutoFill Contact",
+							Text = "Filled data from player " .. target.DisplayName,
 							Duration = 2,
 						})
 						break
@@ -1381,7 +1381,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = Color3.fromRGB(240, 242, 245),
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "Batal",
+			Text = "Cancel",
 			TextColor3 = COLORS.TextDark,
 			TextSize = 11,
 			Position = UDim2.new(0, 0, 1, -34),
@@ -1400,7 +1400,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = COLORS.AccentBlue,
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "Simpan",
+			Text = "Save",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 11,
 			Position = UDim2.new(0.52, 0, 1, -34),
@@ -1416,11 +1416,11 @@ function ContactsApp.Create(context: any)
 			local noteText = string.gsub(noteBox.Text, "^%s*(.-)%s*$", "%1")
 
 			if nameText == "" then
-				context.SendNotification({ Title = "⚠️ Peringatan", Text = "Nama kontak wajib diisi!", Duration = 3 })
+				context.SendNotification({ Title = "⚠️ Warning", Text = "Contact name is required!", Duration = 3 })
 				return
 			end
 			if phoneText == "" then
-				context.SendNotification({ Title = "⚠️ Peringatan", Text = "Nomor HP wajib diisi!", Duration = 3 })
+				context.SendNotification({ Title = "⚠️ Warning", Text = "Phone number is required!", Duration = 3 })
 				return
 			end
 
@@ -1443,8 +1443,8 @@ function ContactsApp.Create(context: any)
 			modalOverlay.Visible = false
 			updateContactsList()
 			context.SendNotification({
-				Title = "✅ Kontak Disimpan",
-				Text = "Kontak " .. nameText .. " berhasil disimpan.",
+				Title = "✅ Contact Saved",
+				Text = "Contact " .. nameText .. " successfully saved.",
 				Duration = 3,
 			})
 		end)
@@ -1486,7 +1486,7 @@ function ContactsApp.Create(context: any)
 			Name = "Title",
 			Parent = card,
 			Font = Constants.Fonts.Semibold,
-			Text = "📡 AirDrop Kontak Masuk",
+			Text = "📡 Incoming AirDrop Contact",
 			TextColor3 = COLORS.TextDark,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.new(0, 0, 0, 52),
@@ -1500,7 +1500,7 @@ function ContactsApp.Create(context: any)
 		label({
 			Name = "Message",
 			Parent = card,
-			Text = data.senderName .. " ingin membagikan kontak '" .. (cData.Name or "Kontak") .. "' (" .. (cData.Phone or "-") .. ").",
+			Text = data.senderName .. " wants to share contact '" .. (cData.Name or "Contact") .. "' (" .. (cData.Phone or "-") .. ").",
 			TextColor3 = COLORS.TextMuted,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.new(0, 0, 0, 76),
@@ -1516,7 +1516,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = Color3.fromRGB(240, 242, 245),
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "Tolak",
+			Text = "Decline",
 			TextColor3 = COLORS.TextDark,
 			TextSize = 12,
 			Position = UDim2.new(0, 0, 1, -44),
@@ -1535,7 +1535,7 @@ function ContactsApp.Create(context: any)
 			BackgroundColor3 = COLORS.AccentGreen,
 			BorderSizePixel = 0,
 			Font = Constants.Fonts.Semibold,
-			Text = "Terima",
+			Text = "Accept",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextSize = 12,
 			Position = UDim2.new(0.52, 0, 1, -44),
@@ -1550,15 +1550,15 @@ function ContactsApp.Create(context: any)
 				Id = "airdrop_" .. tick(),
 				Name = cData.Name or data.senderName,
 				Phone = cData.Phone or "08xxxxxx",
-				Note = "Diterima via AirDrop dari " .. data.senderName,
+				Note = "Received via AirDrop from " .. data.senderName,
 				UserId = cData.UserId or data.senderUserId,
 			})
 			saveService:Set("Contacts", state.Contacts)
 			modalOverlay.Visible = false
 			updateContactsList()
 			context.SendNotification({
-				Title = "✅ AirDrop Diterima",
-				Text = "Kontak " .. (cData.Name or data.senderName) .. " berhasil disimpan ke Kontak Anda!",
+				Title = "✅ AirDrop Accepted",
+				Text = "Contact " .. (cData.Name or data.senderName) .. " saved to your Contacts!",
 				Duration = 4,
 			})
 		end)

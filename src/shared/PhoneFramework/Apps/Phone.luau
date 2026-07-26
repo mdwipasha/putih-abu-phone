@@ -264,7 +264,7 @@ function PhoneApp.Create(context: any)
 	local tabs = {
 		{ id = "recents",  name = "Recents",  icon = "",   pos = 0 },
 		{ id = "keypad",   name = "Keypad",   icon = "",    pos = 1 },
-		{ id = "contacts", name = "Kontak",   icon = "",  pos = 2 },
+		{ id = "contacts", name = "Contacts", icon = "",  pos = 2 },
 	}
 
 	local tabButtons = {}
@@ -491,7 +491,7 @@ function PhoneApp.Create(context: any)
 				Name = "EmptyLabel",
 				Parent = recentsView,
 				Font = Constants.Fonts.Regular,
-				Text = "Belum ada riwayat panggilan.",
+				Text = "No call history.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Size = UDim2.new(1, 0, 0, 80),
@@ -616,7 +616,7 @@ function PhoneApp.Create(context: any)
 				Name = "EmptyLabel",
 				Parent = contactsView,
 				Font = Constants.Fonts.Regular,
-				Text = "Belum ada kontak tersimpan.\nTambah kontak di aplikasi Contacts.",
+				Text = "No contacts saved.\nAdd contacts in Contacts app.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				TextWrapped = true,
@@ -657,7 +657,7 @@ function PhoneApp.Create(context: any)
 				Name = "Name",
 				Parent = card,
 				Font = Constants.Fonts.Semibold,
-				Text = contact.Name or "Kontak",
+				Text = contact.Name or "Contact",
 				TextColor3 = COLORS.TextDark,
 				Position = UDim2.new(0, 56, 0, 10),
 				Size = UDim2.new(0.52, 0, 0, 16),
@@ -856,7 +856,7 @@ function PhoneApp.Create(context: any)
 		Name = "IncName",
 		Parent = incomingCallOverlay,
 		Font = Constants.Fonts.Semibold,
-		Text = "Panggilan Masuk",
+		Text = "Incoming Call",
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Position = UDim2.new(0, 0, 0.36, 0),
@@ -870,7 +870,7 @@ function PhoneApp.Create(context: any)
 		Name = "IncSub",
 		Parent = incomingCallOverlay,
 		Font = Constants.Fonts.Regular,
-		Text = "Sedang memanggil...",
+		Text = "Ringing...",
 		TextColor3 = COLORS.AccentGreen,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		Position = UDim2.new(0, 0, 0.43, 0),
@@ -1023,11 +1023,11 @@ function PhoneApp.Create(context: any)
 
 		if tabId == "recents" then
 			titleLabel.Text = "Recents"
-			headerActionBtn.Text = "Hapus Semua"
+			headerActionBtn.Text = "Clear All"
 			headerActionBtn.Visible = true
 			renderRecents()
 		elseif tabId == "contacts" then
-			titleLabel.Text = "Kontak"
+			titleLabel.Text = "Contacts"
 			headerActionBtn.Visible = false
 			renderContacts()
 		else
@@ -1123,7 +1123,7 @@ function PhoneApp.Create(context: any)
 				state.CallState = "idle"
 				state.CallPartner = nil
 				if payload and payload.reason then
-					context.SendNotification({ Title = "📵 Nomor Tidak Terdaftar", Text = payload.reason, Duration = 4 })
+					context.SendNotification({ Title = "📵 Number Not Registered", Text = payload.reason, Duration = 4 })
 				end
 			end
 		end)

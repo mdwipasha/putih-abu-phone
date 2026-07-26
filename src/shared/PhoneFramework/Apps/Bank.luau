@@ -835,7 +835,7 @@ function Bank.Create(context)
 		BackgroundColor3 = COLORS.EmeraldLight,
 		BorderSizePixel = 0,
 		Font = Constants.Fonts.Semibold,
-		Text = "👤 Kontak",
+		Text = "👤 Contact",
 		TextColor3 = COLORS.EmeraldMain,
 		Position = UDim2.new(0.74, 0, 0, 18),
 		Size = UDim2.new(0.26, 0, 0, 36),
@@ -872,7 +872,7 @@ function Bank.Create(context)
 	label({
 		Parent = contactPickerCard,
 		Font = Constants.Fonts.Semibold,
-		Text = "Pilih Kontak Transfer",
+		Text = "Select Transfer Contact",
 		TextColor3 = COLORS.TextDark,
 		Position = UDim2.new(0, 14, 0, 10),
 		Size = UDim2.new(0.7, 0, 0, 20),
@@ -932,7 +932,7 @@ function Bank.Create(context)
 			label({
 				Parent = pickerScroll,
 				Font = Constants.Fonts.Regular,
-				Text = "Belum ada kontak tersimpan.\nTambah kontak di aplikasi Contacts.",
+				Text = "No contacts saved.\nAdd contacts in Contacts app.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Size = UDim2.new(1, 0, 0, 80),
@@ -959,7 +959,7 @@ function Bank.Create(context)
 				label({
 					Parent = row,
 					Font = Constants.Fonts.Semibold,
-					Text = contact.Name or "Tanpa Nama",
+					Text = contact.Name or "Unnamed",
 					TextColor3 = COLORS.TextDark,
 					Position = UDim2.new(0, 10, 0, 6),
 					Size = UDim2.new(0.8, 0, 0, 16),
@@ -1367,8 +1367,8 @@ function Bank.Create(context)
 				AppId = "bank",
 				AppName = "Bank",
 				AppIcon = "rbxassetid://126903961002759",
-				Title = "⚠️ Notifikasi Bank",
-				Body = message or "Transaksi gagal.",
+				Title = "⚠️ Bank Notification",
+				Body = message or "Transaction failed.",
 				Duration = 4,
 			})
 		end
@@ -1591,16 +1591,16 @@ function Bank.Create(context)
 		local iconBg = COLORS.GoldLight
 
 		if transaction.Direction == "INCOMING" then
-			title = "Uang Masuk"
-			local sender = if transaction.Sender and transaction.Sender ~= "Unknown" and transaction.Sender ~= "-" then transaction.Sender else "Pengirim"
-			body = "+" .. amountText .. " dari " .. sender
+			title = "Money Received"
+			local sender = if transaction.Sender and transaction.Sender ~= "Unknown" and transaction.Sender ~= "-" then transaction.Sender else "Sender"
+			body = "+" .. amountText .. " from " .. sender
 			iconAsset = ICONS.Incoming
 			iconColor = COLORS.Green
 			iconBg = COLORS.GreenLight
 		elseif transaction.Direction == "OUTGOING" then
-			title = "Transfer Berhasil"
-			local receiver = if transaction.Receiver and transaction.Receiver ~= "Unknown" and transaction.Receiver ~= "-" then transaction.Receiver else "Penerima"
-			body = "-" .. amountText .. " ke " .. receiver
+			title = "Transfer Successful"
+			local receiver = if transaction.Receiver and transaction.Receiver ~= "Unknown" and transaction.Receiver ~= "-" then transaction.Receiver else "Recipient"
+			body = "-" .. amountText .. " to " .. receiver
 			iconAsset = ICONS.Outgoing
 			iconColor = COLORS.Red
 			iconBg = COLORS.RedLight

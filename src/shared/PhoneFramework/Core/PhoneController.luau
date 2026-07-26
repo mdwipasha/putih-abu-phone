@@ -117,8 +117,8 @@ function PhoneController.new()
 					AppId = "contacts",
 					AppName = "Contacts",
 					AppIcon = "rbxassetid://114778546922350",
-					Title = "📡 AirDrop Kontak Masuk",
-					Body = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " mengirim kontak via AirDrop.",
+					Title = "📡 AirDrop Contact Received",
+					Body = resolveContactName(payload.contactData and payload.contactData.Phone, payload.senderName) .. " sent a contact via AirDrop.",
 					Duration = 5,
 				})
 			elseif action == "IncomingCall" and payload then
@@ -127,11 +127,11 @@ function PhoneController.new()
 					AppId = "phone",
 					AppName = "Phone",
 					AppIcon = "rbxassetid://71727318918905",
-					Title = "📞 Panggilan Masuk",
-					Body = callerDisp .. " memanggil Anda...",
+					Title = "📞 Incoming Call",
+					Body = callerDisp .. " is calling you...",
 					Duration = 6,
 				})
-				-- Requirement 3: Panggilan Masuk Membuka HP Otomatis
+				-- Requirement 3: Incoming Call Auto Opens Phone
 				if not self._opened then
 					self:Open()
 				end
@@ -148,7 +148,7 @@ function PhoneController.new()
 					AppId = "messages",
 					AppName = "Messages",
 					AppIcon = "rbxassetid://108650574179237",
-					Title = "💬 Pesan Masuk",
+					Title = "💬 New Message",
 					Body = senderDisp .. ": " .. (payload.messageText or ""),
 					Duration = 5,
 				})
