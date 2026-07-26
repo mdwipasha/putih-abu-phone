@@ -97,6 +97,21 @@ function PhoneController.new()
 					Text = (payload.senderName or "Seseorang") .. " mengirim kontak via AirDrop. Buka app Contacts!",
 					Duration = 5,
 				})
+			elseif action == "IncomingCall" and payload then
+				self:SendNotification({
+					Title = "📞 Panggilan Masuk",
+					Text = (payload.callerName or "Seseorang") .. " memanggil Anda... Buka app Phone!",
+					Duration = 6,
+				})
+				if self._opened and not self._locked then
+					self:OpenApp("phone")
+				end
+			elseif action == "ReceiveSMS" and payload then
+				self:SendNotification({
+					Title = "💬 Pesan Masuk",
+					Text = (payload.senderName or "SMS") .. ": " .. (payload.messageText or ""),
+					Duration = 5,
+				})
 			end
 		end)
 	end

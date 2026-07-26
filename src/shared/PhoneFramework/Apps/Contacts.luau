@@ -7,6 +7,7 @@ local root = script.Parent.Parent
 local Constants = require(root:WaitForChild("Shared"):WaitForChild("Constants"))
 local StatusBar = require(root:WaitForChild("Shared"):WaitForChild("Components"):WaitForChild("StatusBar"))
 local create = require(root:WaitForChild("Shared"):WaitForChild("Utilities"):WaitForChild("Create"))
+local EconomyAdapter = require(root:WaitForChild("Services"):WaitForChild("EconomyAdapter"))
 
 local RADAR_RADIUS_STUDS = 40 -- Radius zona AirDrop dalam studs (~13 meter)
 
@@ -14,7 +15,7 @@ local ICONS = {
 	Phone = "rbxassetid://71727318918905",
 	Message = "rbxassetid://108650574179237",
 	AirDrop = "rbxassetid://127578521635782",
-	Search = "rbxassetid://139428637585494",
+	Search = "rbxassetid://91955678829293",
 	Star = "rbxassetid://83719759786505",
 	Check = "rbxassetid://82537775608740",
 	AvatarFallback = "rbxassetid://114778546922350",
@@ -34,36 +35,7 @@ local COLORS = {
 	SectionHeader = Color3.fromRGB(238, 238, 242),
 }
 
-local DEFAULT_CONTACTS = {
-	{
-		Id = "def_1",
-		Name = "Layanan Darurat",
-		Phone = "112",
-		Note = "Darurat & Keamanan",
-		IsFavorite = true,
-	},
-	{
-		Id = "def_2",
-		Name = "Bank Putih-Abu",
-		Phone = "14045",
-		Note = "Customer Service Bank",
-		IsFavorite = true,
-	},
-	{
-		Id = "def_3",
-		Name = "Budi Santoso",
-		Phone = "0812-3456-7890",
-		Note = "Teman Kelas",
-		IsFavorite = false,
-	},
-	{
-		Id = "def_4",
-		Name = "Siti Rahma",
-		Phone = "0857-1122-3344",
-		Note = "Sahabat",
-		IsFavorite = false,
-	},
-}
+local DEFAULT_CONTACTS = {}
 
 local function rounded(instance: Instance, radiusOffset: number)
 	local corner = Instance.new("UICorner")
@@ -206,9 +178,9 @@ function ContactsApp.Create(context: any)
 		AutoButtonColor = true,
 		BackgroundTransparency = 1,
 		Font = Constants.Fonts.Regular,
-		Text = "く Home",
+		Text = "く",
 		TextColor3 = COLORS.AccentBlue,
-		TextSize = 16,
+		TextSize = 18,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Position = UDim2.new(0, 10, 0, 0),
 		Size = UDim2.new(0, 75, 1, 0),
@@ -246,16 +218,6 @@ function ContactsApp.Create(context: any)
 		Size = UDim2.new(0, 28, 0, 28),
 		ZIndex = 61,
 		Parent = navBar,
-	})
-	local airDropIconHeader = iconImage({
-		Name = "Icon",
-		Image = ICONS.AirDrop,
-		ImageColor3 = COLORS.AccentGreen,
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(20, 20),
-		ZIndex = 62,
-		Parent = airDropHeaderBtn,
 	})
 
 	-- Add Contact Button (+) di Header
@@ -299,8 +261,7 @@ function ContactsApp.Create(context: any)
 	local tabButtons = {}
 	local tabs = {
 		{ id = "all", name = "Semua Kontak" },
-		{ id = "favorites", name = "★ Favorit" },
-		{ id = "airdrop", name = "📡 AirDrop Radar" },
+		{ id = "airdrop", name = "AirDrop Contact" },
 	}
 
 	local tabWidth = 1 / #tabs
@@ -500,7 +461,10 @@ function ContactsApp.Create(context: any)
 			ZIndex = 54,
 		})
 
-		local myPhone = saveService:Get("MyPhoneNumber", "08" .. string.sub(tostring(localPlayer.UserId * 73), 1, 8))
+		local myPhone = EconomyAdapter.GetPhoneNumber()
+		if myPhone == "-" or myPhone == "" then
+			myPhone = "08" .. tostring(math.abs(localPlayer.UserId))
+		end
 		label({
 			Name = "Phone",
 			Parent = card,
@@ -514,37 +478,6 @@ function ContactsApp.Create(context: any)
 			ZIndex = 54,
 		})
 
-		local shareBtn = create("TextButton", {
-			Name = "ShareMyContactBtn",
-			AutoButtonColor = true,
-			BackgroundColor3 = Color3.fromRGB(235, 245, 255),
-			BorderSizePixel = 0,
-			Font = Constants.Fonts.Semibold,
-			Text = "📡 AirDrop",
-			TextColor3 = COLORS.AccentBlue,
-			TextSize = 10,
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -10, 0.5, 0),
-			Size = UDim2.new(0, 70, 0, 28),
-			ZIndex = 54,
-			Parent = card,
-		})
-		rounded(shareBtn, 14)
-		stroke(shareBtn, Color3.fromRGB(200, 225, 255), 1)
-
-		shareBtn.Activated:Connect(function()
-			-- Switch ke tab AirDrop
-			for id, b in pairs(tabButtons) do
-				b.TextColor3 = if id == "airdrop" then COLORS.AccentBlue else COLORS.TextMuted
-			end
-			TweenService:Create(tabIndicator, TweenInfo.new(0.2), { Position = UDim2.new(2 * tabWidth, 0, 1, -2) }):Play()
-			state.ActiveTab = "airdrop"
-			searchFrame.Visible = false
-			contactsScroll.Visible = false
-			airDropFrame.Visible = true
-			updateAirDropRadar()
-		end)
-
 		card.Activated:Connect(function()
 			openDetailModal({
 				Id = "my_profile",
@@ -552,7 +485,6 @@ function ContactsApp.Create(context: any)
 				Phone = myPhone,
 				Note = "Profil Utama Pemilik HP",
 				UserId = localPlayer.UserId,
-				IsFavorite = true,
 				IsSelf = true,
 			})
 		end)
@@ -561,7 +493,7 @@ function ContactsApp.Create(context: any)
 	-- Render Daftar Kontak
 	updateContactsList = function()
 		for _, child in ipairs(contactsScroll:GetChildren()) do
-			if child:IsA("Frame") or child:IsA("TextButton") then
+			if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ImageLabel") then
 				child:Destroy()
 			end
 		end
@@ -578,9 +510,7 @@ function ContactsApp.Create(context: any)
 				or string.find(string.lower(contact.Phone or ""), query, 1, true)
 				or string.find(string.lower(contact.Note or ""), query, 1, true)
 
-			local matchTab = (state.ActiveTab == "all") or (state.ActiveTab == "favorites" and contact.IsFavorite)
-
-			if matchQuery and matchTab then
+			if matchQuery then
 				table.insert(filtered, contact)
 			end
 		end
@@ -591,11 +521,11 @@ function ContactsApp.Create(context: any)
 		end)
 
 		if #filtered == 0 then
-			local emptyLabel = label({
+			label({
 				Name = "EmptyLabel",
 				Parent = contactsScroll,
 				Font = Constants.Fonts.Regular,
-				Text = if state.ActiveTab == "favorites" then "Belum ada kontak favorit." else "Tidak ada kontak ditemukan.",
+				Text = "Belum ada kontak tersimpan.",
 				TextColor3 = COLORS.TextMuted,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Size = UDim2.new(1, 0, 0, 60),
@@ -669,20 +599,6 @@ function ContactsApp.Create(context: any)
 				ZIndex = 54,
 			})
 
-			-- Favorite Badge Icon
-			if contact.IsFavorite then
-				iconImage({
-					Name = "StarBadge",
-					Image = ICONS.Star,
-					ImageColor3 = COLORS.AccentGold,
-					AnchorPoint = Vector2.new(1, 0.5),
-					Position = UDim2.new(1, -70, 0.5, 0),
-					Size = UDim2.fromOffset(14, 14),
-					ZIndex = 54,
-					Parent = row,
-				})
-			end
-
 			-- Quick Call Button
 			local callBtn = create("TextButton", {
 				Name = "CallBtn",
@@ -752,7 +668,7 @@ function ContactsApp.Create(context: any)
 	-- Render Radar Scanner AirDrop
 	updateAirDropRadar = function()
 		for _, child in ipairs(airDropScroll:GetChildren()) do
-			if child:IsA("Frame") or child:IsA("TextButton") then
+			if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("TextLabel") or child:IsA("ImageLabel") then
 				child:Destroy()
 			end
 		end
@@ -944,13 +860,15 @@ function ContactsApp.Create(context: any)
 			rounded(sendAirDropBtn, 15)
 
 			sendAirDropBtn.Activated:Connect(function()
-				local myPhone = saveService:Get("MyPhoneNumber", "08" .. string.sub(tostring(localPlayer.UserId * 73), 1, 8))
+				local myPhone = EconomyAdapter.GetPhoneNumber()
+				if myPhone == "-" or myPhone == "" then
+					myPhone = "08" .. tostring(math.abs(localPlayer.UserId))
+				end
 				local contactPayload = {
 					Name = localPlayer.DisplayName,
 					Phone = myPhone,
 					Note = "Kontak via AirDrop",
 					UserId = localPlayer.UserId,
-					IsFavorite = false,
 				}
 
 				if remote and remote:IsA("RemoteEvent") then
@@ -959,7 +877,7 @@ function ContactsApp.Create(context: any)
 						contactData = contactPayload,
 					})
 					context.SendNotification({
-						Title = "📡 AirDrop Dikirim",
+						Title = "AirDrop Dikirim",
 						Text = "Mengirim kontak ke " .. target.DisplayName .. "...",
 						Duration = 3,
 					})
@@ -975,17 +893,18 @@ function ContactsApp.Create(context: any)
 			child:Destroy()
 		end
 
+		local cardHeight = if not contact.IsSelf then 240 else 190
 		local card = create("Frame", {
 			Name = "DetailCard",
 			BackgroundColor3 = COLORS.Card,
 			BorderSizePixel = 0,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.new(0.88, 0, 0, 340),
+			Size = UDim2.new(0.86, 0, 0, cardHeight),
 			ZIndex = 101,
 			Parent = modalOverlay,
 		})
-		rounded(card, 16)
+		rounded(card, 14)
 		stroke(card, COLORS.CardStroke, 2)
 		padded(card, 0.04, 0.04, 0.03, 0.04)
 
@@ -997,10 +916,10 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "✕",
 			TextColor3 = COLORS.TextMuted,
-			TextSize = 16,
+			TextSize = 15,
 			AnchorPoint = Vector2.new(1, 0),
 			Position = UDim2.new(1, 0, 0, 0),
-			Size = UDim2.new(0, 24, 0, 24),
+			Size = UDim2.new(0, 22, 0, 22),
 			ZIndex = 102,
 			Parent = card,
 		})
@@ -1008,19 +927,19 @@ function ContactsApp.Create(context: any)
 			modalOverlay.Visible = false
 		end)
 
-		-- Avatar Besar
+		-- Avatar Ringkas
 		local avatar = getAvatarUrl(contact)
 		local avatarImg = create("ImageLabel", {
 			Name = "Avatar",
 			BackgroundColor3 = Color3.fromRGB(235, 238, 245),
 			Image = avatar,
 			AnchorPoint = Vector2.new(0.5, 0),
-			Position = UDim2.new(0.5, 0, 0, 10),
-			Size = UDim2.fromOffset(68, 68),
+			Position = UDim2.new(0.5, 0, 0, 6),
+			Size = UDim2.fromOffset(52, 52),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(avatarImg, 34)
+		rounded(avatarImg, 26)
 		stroke(avatarImg, COLORS.AccentBlue, 2)
 
 		-- Name & Phone
@@ -1031,10 +950,10 @@ function ContactsApp.Create(context: any)
 			Text = contact.Name or "Tanpa Nama",
 			TextColor3 = COLORS.TextDark,
 			TextXAlignment = Enum.TextXAlignment.Center,
-			Position = UDim2.new(0, 0, 0, 84),
-			Size = UDim2.new(1, 0, 0, 20),
-			MaxTextSize = 16,
-			MinTextSize = 11,
+			Position = UDim2.new(0, 0, 0, 62),
+			Size = UDim2.new(1, 0, 0, 18),
+			MaxTextSize = 14,
+			MinTextSize = 10,
 			ZIndex = 102,
 		})
 
@@ -1044,25 +963,26 @@ function ContactsApp.Create(context: any)
 			Text = contact.Phone or "-",
 			TextColor3 = COLORS.AccentBlue,
 			TextXAlignment = Enum.TextXAlignment.Center,
-			Position = UDim2.new(0, 0, 0, 106),
-			Size = UDim2.new(1, 0, 0, 16),
-			MaxTextSize = 13,
-			MinTextSize = 9,
+			Position = UDim2.new(0, 0, 0, 82),
+			Size = UDim2.new(1, 0, 0, 14),
+			MaxTextSize = 12,
+			MinTextSize = 8,
 			ZIndex = 102,
 		})
 
-		if contact.Note and contact.Note ~= "" then
+		local hasNote = contact.Note and contact.Note ~= ""
+		if hasNote then
 			local noteBadge = create("Frame", {
 				Name = "NoteBadge",
 				BackgroundColor3 = Color3.fromRGB(240, 242, 248),
 				BorderSizePixel = 0,
 				AnchorPoint = Vector2.new(0.5, 0),
-				Position = UDim2.new(0.5, 0, 0, 126),
-				Size = UDim2.new(0.7, 0, 0, 22),
+				Position = UDim2.new(0.5, 0, 0, 98),
+				Size = UDim2.new(0.75, 0, 0, 18),
 				ZIndex = 102,
 				Parent = card,
 			})
-			rounded(noteBadge, 11)
+			rounded(noteBadge, 9)
 			label({
 				Name = "NoteText",
 				Parent = noteBadge,
@@ -1071,18 +991,19 @@ function ContactsApp.Create(context: any)
 				TextXAlignment = Enum.TextXAlignment.Center,
 				Position = UDim2.fromScale(0, 0),
 				Size = UDim2.fromScale(1, 1),
-				MaxTextSize = 10,
-				MinTextSize = 7,
+				MaxTextSize = 9,
+				MinTextSize = 6,
 				ZIndex = 103,
 			})
 		end
 
-		-- Action Bar Grid (Panggil, Pesan, AirDrop, Favorit)
+		-- Action Bar Grid (Panggil, Pesan, AirDrop)
+		local actionsY = if hasNote then 120 else 102
 		local actionsGrid = create("Frame", {
 			Name = "ActionsGrid",
 			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 0, 0, 156),
-			Size = UDim2.new(1, 0, 0, 56),
+			Position = UDim2.new(0, 0, 0, actionsY),
+			Size = UDim2.new(1, 0, 0, 44),
 			ZIndex = 102,
 			Parent = card,
 		})
@@ -1094,12 +1015,12 @@ function ContactsApp.Create(context: any)
 				BackgroundColor3 = Color3.fromRGB(246, 248, 252),
 				BorderSizePixel = 0,
 				Text = "",
-				Position = UDim2.new((xIndex - 1) * 0.25 + 0.02, 0, 0, 0),
-				Size = UDim2.new(0.21, 0, 1, 0),
+				Position = UDim2.new((xIndex - 1) * 0.33 + 0.01, 0, 0, 0),
+				Size = UDim2.new(0.31, 0, 1, 0),
 				ZIndex = 103,
 				Parent = actionsGrid,
 			})
-			rounded(btn, 10)
+			rounded(btn, 8)
 			stroke(btn, COLORS.CardStroke, 1)
 
 			iconImage({
@@ -1107,8 +1028,8 @@ function ContactsApp.Create(context: any)
 				Image = iconAsset,
 				ImageColor3 = color,
 				AnchorPoint = Vector2.new(0.5, 0),
-				Position = UDim2.new(0.5, 0, 0, 8),
-				Size = UDim2.fromOffset(20, 20),
+				Position = UDim2.new(0.5, 0, 0, 6),
+				Size = UDim2.fromOffset(16, 16),
 				ZIndex = 104,
 				Parent = btn,
 			})
@@ -1121,10 +1042,10 @@ function ContactsApp.Create(context: any)
 				TextColor3 = COLORS.TextDark,
 				TextXAlignment = Enum.TextXAlignment.Center,
 				AnchorPoint = Vector2.new(0.5, 1),
-				Position = UDim2.new(0.5, 0, 1, -4),
-				Size = UDim2.new(1, 0, 0, 14),
-				MaxTextSize = 9,
-				MinTextSize = 7,
+				Position = UDim2.new(0.5, 0, 1, -3),
+				Size = UDim2.new(1, 0, 0, 12),
+				MaxTextSize = 8,
+				MinTextSize = 6,
 				ZIndex = 104,
 			})
 
@@ -1157,14 +1078,6 @@ function ContactsApp.Create(context: any)
 			updateAirDropRadar()
 		end)
 
-		local favColor = if contact.IsFavorite then COLORS.AccentGold else COLORS.TextMuted
-		makeActionButton("Fav", if contact.IsFavorite then "Favorit ★" else "Favorit ☆", ICONS.Star, favColor, 4, function()
-			contact.IsFavorite = not contact.IsFavorite
-			saveService:Set("Contacts", state.Contacts)
-			modalOverlay.Visible = false
-			updateContactsList()
-		end)
-
 		-- Action Bottom Buttons (Edit & Delete)
 		if not contact.IsSelf then
 			local editBtn = create("TextButton", {
@@ -1175,13 +1088,13 @@ function ContactsApp.Create(context: any)
 				Font = Constants.Fonts.Semibold,
 				Text = "Edit Kontak",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 12,
-				Position = UDim2.new(0, 0, 1, -44),
-				Size = UDim2.new(0.48, 0, 0, 36),
+				TextSize = 11,
+				Position = UDim2.new(0, 0, 1, -34),
+				Size = UDim2.new(0.48, 0, 0, 30),
 				ZIndex = 103,
 				Parent = card,
 			})
-			rounded(editBtn, 10)
+			rounded(editBtn, 8)
 
 			editBtn.Activated:Connect(function()
 				modalOverlay.Visible = false
@@ -1196,13 +1109,13 @@ function ContactsApp.Create(context: any)
 				Font = Constants.Fonts.Semibold,
 				Text = "Hapus Kontak",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextSize = 12,
-				Position = UDim2.new(0.52, 0, 1, -44),
-				Size = UDim2.new(0.48, 0, 0, 36),
+				TextSize = 11,
+				Position = UDim2.new(0.52, 0, 1, -34),
+				Size = UDim2.new(0.48, 0, 0, 30),
 				ZIndex = 103,
 				Parent = card,
 			})
-			rounded(deleteBtn, 10)
+			rounded(deleteBtn, 8)
 
 			deleteBtn.Activated:Connect(function()
 				for i, c in ipairs(state.Contacts) do
@@ -1237,11 +1150,11 @@ function ContactsApp.Create(context: any)
 			BorderSizePixel = 0,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.new(0.88, 0, 0, 350),
+			Size = UDim2.new(0.86, 0, 0, 245),
 			ZIndex = 101,
 			Parent = modalOverlay,
 		})
-		rounded(card, 16)
+		rounded(card, 14)
 		stroke(card, COLORS.CardStroke, 2)
 		padded(card, 0.04, 0.04, 0.03, 0.04)
 
@@ -1253,9 +1166,9 @@ function ContactsApp.Create(context: any)
 			TextColor3 = COLORS.TextDark,
 			TextXAlignment = Enum.TextXAlignment.Center,
 			Position = UDim2.new(0, 0, 0, 4),
-			Size = UDim2.new(1, 0, 0, 22),
-			MaxTextSize = 15,
-			MinTextSize = 11,
+			Size = UDim2.new(1, 0, 0, 18),
+			MaxTextSize = 14,
+			MinTextSize = 10,
 			ZIndex = 102,
 		})
 
@@ -1265,8 +1178,8 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "NAMA KONTAK",
 			TextColor3 = COLORS.TextMuted,
-			Position = UDim2.new(0, 0, 0, 34),
-			Size = UDim2.new(1, 0, 0, 14),
+			Position = UDim2.new(0, 0, 0, 24),
+			Size = UDim2.new(1, 0, 0, 12),
 			MaxTextSize = 9,
 			MinTextSize = 7,
 			ZIndex = 102,
@@ -1281,14 +1194,14 @@ function ContactsApp.Create(context: any)
 			PlaceholderText = "Masukkan Nama...",
 			Text = if isEdit then (existingContact.Name or "") else "",
 			TextColor3 = COLORS.TextDark,
-			TextSize = 12,
+			TextSize = 11,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.new(0, 0, 0, 50),
-			Size = UDim2.new(1, 0, 0, 34),
+			Position = UDim2.new(0, 0, 0, 38),
+			Size = UDim2.new(1, 0, 0, 28),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(nameBox, 8)
+		rounded(nameBox, 7)
 		stroke(nameBox, COLORS.CardStroke, 1)
 		padded(nameBox, 0.03, 0.03, 0, 0)
 
@@ -1298,8 +1211,8 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "NOMOR TELEPON",
 			TextColor3 = COLORS.TextMuted,
-			Position = UDim2.new(0, 0, 0, 92),
-			Size = UDim2.new(1, 0, 0, 14),
+			Position = UDim2.new(0, 0, 0, 70),
+			Size = UDim2.new(1, 0, 0, 12),
 			MaxTextSize = 9,
 			MinTextSize = 7,
 			ZIndex = 102,
@@ -1311,17 +1224,17 @@ function ContactsApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Contoh: 0812-xxxx-xxxx",
-			Text = if isEdit then (existingContact.Phone or "") else "",
+			PlaceholderText = "Contoh: 0812xxxx",
+			Text = if isEdit then (existingContact.Phone or "") else (if (existingContact and existingContact.Phone) then existingContact.Phone else ""),
 			TextColor3 = COLORS.TextDark,
-			TextSize = 12,
+			TextSize = 11,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.new(0, 0, 0, 108),
-			Size = UDim2.new(1, 0, 0, 34),
+			Position = UDim2.new(0, 0, 0, 84),
+			Size = UDim2.new(1, 0, 0, 28),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(phoneBox, 8)
+		rounded(phoneBox, 7)
 		stroke(phoneBox, COLORS.CardStroke, 1)
 		padded(phoneBox, 0.03, 0.03, 0, 0)
 
@@ -1331,8 +1244,8 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "CATATAN / HUBUNGAN",
 			TextColor3 = COLORS.TextMuted,
-			Position = UDim2.new(0, 0, 0, 150),
-			Size = UDim2.new(1, 0, 0, 14),
+			Position = UDim2.new(0, 0, 0, 116),
+			Size = UDim2.new(1, 0, 0, 12),
 			MaxTextSize = 9,
 			MinTextSize = 7,
 			ZIndex = 102,
@@ -1344,17 +1257,17 @@ function ContactsApp.Create(context: any)
 			ClearTextOnFocus = false,
 			Font = Constants.Fonts.Regular,
 			PlaceholderColor3 = COLORS.TextMuted,
-			PlaceholderText = "Contoh: Teman Sekolah / Kerja",
+			PlaceholderText = "Contoh: Teman Sekolah",
 			Text = if isEdit then (existingContact.Note or "") else "",
 			TextColor3 = COLORS.TextDark,
-			TextSize = 12,
+			TextSize = 11,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Position = UDim2.new(0, 0, 0, 166),
-			Size = UDim2.new(1, 0, 0, 34),
+			Position = UDim2.new(0, 0, 0, 130),
+			Size = UDim2.new(1, 0, 0, 28),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(noteBox, 8)
+		rounded(noteBox, 7)
 		stroke(noteBox, COLORS.CardStroke, 1)
 		padded(noteBox, 0.03, 0.03, 0, 0)
 
@@ -1367,13 +1280,13 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "👤 Autofill dari Player Terdekat",
 			TextColor3 = COLORS.AccentBlue,
-			TextSize = 11,
-			Position = UDim2.new(0, 0, 0, 210),
-			Size = UDim2.new(1, 0, 0, 32),
+			TextSize = 10,
+			Position = UDim2.new(0, 0, 0, 164),
+			Size = UDim2.new(1, 0, 0, 26),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(pickPlayerBtn, 8)
+		rounded(pickPlayerBtn, 7)
 		stroke(pickPlayerBtn, Color3.fromRGB(200, 225, 255), 1)
 
 		local selectedUserId = if isEdit then existingContact.UserId else nil
@@ -1408,13 +1321,13 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "Batal",
 			TextColor3 = COLORS.TextDark,
-			TextSize = 12,
-			Position = UDim2.new(0, 0, 1, -44),
-			Size = UDim2.new(0.48, 0, 0, 36),
+			TextSize = 11,
+			Position = UDim2.new(0, 0, 1, -34),
+			Size = UDim2.new(0.48, 0, 0, 30),
 			ZIndex = 102,
 			Parent = card,
 		})
-		rounded(cancelBtn, 10)
+		rounded(cancelBtn, 8)
 		cancelBtn.Activated:Connect(function()
 			modalOverlay.Visible = false
 		end)
@@ -1427,9 +1340,9 @@ function ContactsApp.Create(context: any)
 			Font = Constants.Fonts.Semibold,
 			Text = "Simpan",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextSize = 12,
-			Position = UDim2.new(0.52, 0, 1, -44),
-			Size = UDim2.new(0.48, 0, 0, 36),
+			TextSize = 11,
+			Position = UDim2.new(0.52, 0, 1, -34),
+			Size = UDim2.new(0.48, 0, 0, 30),
 			ZIndex = 102,
 			Parent = card,
 		})
@@ -1461,7 +1374,6 @@ function ContactsApp.Create(context: any)
 					Phone = phoneText,
 					Note = noteText,
 					UserId = selectedUserId,
-					IsFavorite = false,
 				})
 			end
 
@@ -1578,7 +1490,6 @@ function ContactsApp.Create(context: any)
 				Phone = cData.Phone or "08xxxxxx",
 				Note = "Diterima via AirDrop dari " .. data.senderName,
 				UserId = cData.UserId or data.senderUserId,
-				IsFavorite = false,
 			})
 			saveService:Set("Contacts", state.Contacts)
 			modalOverlay.Visible = false
@@ -1600,14 +1511,6 @@ function ContactsApp.Create(context: any)
 			for tid, b in pairs(tabButtons) do
 				b.TextColor3 = if tid == id then COLORS.AccentBlue else COLORS.TextMuted
 			end
-
-			local targetX = 0
-			if id == "favorites" then
-				targetX = tabWidth
-			elseif id == "airdrop" then
-				targetX = 2 * tabWidth
-			end
-			TweenService:Create(tabIndicator, TweenInfo.new(0.2), { Position = UDim2.new(targetX, 0, 1, -2) }):Play()
 
 			if id == "airdrop" then
 				searchFrame.Visible = false
@@ -1688,6 +1591,15 @@ function ContactsApp.Create(context: any)
 
 	-- Initial Render
 	updateContactsList()
+
+	-- Cek jika ada prefill nomor HP dari app Phone (tombol + Tambah ke Kontak)
+	local prefillPhone = saveService:Get("_PrefillPhone", nil)
+	if prefillPhone and prefillPhone ~= "" then
+		saveService:Set("_PrefillPhone", nil)
+		task.defer(function()
+			openAddEditModal({ Phone = prefillPhone })
+		end)
+	end
 
 	return rootFrame
 end

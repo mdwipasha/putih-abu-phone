@@ -2,12 +2,42 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
 local Constants = require(ReplicatedStorage.Shared.PhoneFramework.Shared.Constants)
+local Economy = require(script:WaitForChild("EconomyFramework"):WaitForChild("API"):WaitForChild("Economy"))
 
 local remote = ReplicatedStorage:FindFirstChild(Constants.RemoteName)
 if not remote then
 	remote = Instance.new("RemoteEvent")
 	remote.Name = Constants.RemoteName
 	remote.Parent = ReplicatedStorage
+end
+
+local function cleanPhone(rawPhone: any): string
+	if typeof(rawPhone) ~= "string" then return "" end
+	return rawPhone:gsub("[%s%-]", "")
+end
+
+local function getPlayerPhone(p: Player): string
+	local phone = Economy.GetPhoneNumber(p)
+	if not phone or phone == "" or phone == "-" then
+		phone = "08" .. tostring(math.abs(p.UserId))
+	end
+	return phone
+end
+
+local function findPlayerByPhoneNum(rawPhone: string): Player?
+	local phoneStr = cleanPhone(rawPhone)
+	if phoneStr == "" then return nil end
+
+	local found = Economy.FindPlayerByPhone(phoneStr)
+	if found then return found end
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		local pPhone = cleanPhone(getPlayerPhone(p))
+		if pPhone == phoneStr then
+			return p
+		end
+	end
+	return nil
 end
 
 -- Warna iPhone 5 Gold / Champagne
@@ -285,6 +315,121 @@ remote.OnServerEvent:Connect(function(player: Player, action: string, value: any
 						})
 					end
 				end
+			end
+		end
+
+	elseif action == "StartCall" then
+		-- value = { targetUserId = number, targetPhone = string }
+		if type(value) == "table" then
+			local targetPhoneStr = cleanPhone(value.targetPhone)
+			local targetPlayer = nil
+			local targetName = nil
+			local targetPhone = targetPhoneStr
+
+			-- 1. Lookup by userId if provided
+			if value.targetUserId then
+				targetPlayer = Players:GetPlayerByUserId(value.targetUserId)
+			end
+
+			-- 2. Lookup by phone among all online players
+			if not targetPlayer and targetPhoneStr ~= "" then
+				targetPlayer = findPlayerByPhoneNum(targetPhoneStr)
+			end
+
+			if targetPlayer and targetPlayer ~= player then
+				-- Target is online: ring them
+				targetName = targetPlayer.DisplayName or targetPlayer.Name
+				targetPhone = getPlayerPhone(targetPlayer)
+				local callerPhone = getPlayerPhone(player)
+				remote:FireClient(targetPlayer, "IncomingCall", {
+					callerUserId = player.UserId,
+					callerName = player.DisplayName or player.Name,
+					callerPhone = callerPhone,
+				})
+				remote:FireClient(player, "CallRinging", {
+					targetUserId = targetPlayer.UserId,
+					targetName = targetName,
+					targetPhone = targetPhone,
+				})
+			elseif targetPhoneStr ~= "" and targetPhoneStr:match("^%d+$") and #targetPhoneStr >= 4 then
+				-- Number looks valid but player is offline: allow call to ring
+				-- The caller's screen will show "Memanggil..." until they give up
+				local displayNum = value.targetPhone or targetPhoneStr
+				remote:FireClient(player, "CallRinging", {
+					targetUserId = nil,
+					targetName = displayNum,
+					targetPhone = targetPhoneStr,
+				})
+			else
+				-- Number is empty, non-numeric, or clearly invalid
+				local displayNum = if value.targetPhone and value.targetPhone ~= "" then value.targetPhone else "Nomor"
+				remote:FireClient(player, "CallFailed", {
+					reason = "Nomor telepon '" .. displayNum .. "' tidak terdaftar atau tidak valid.",
+				})
+			end
+		end
+
+	elseif action == "AnswerCall" then
+		-- value = { callerUserId = number }
+		if type(value) == "table" and value.callerUserId then
+			local callerPlayer = Players:GetPlayerByUserId(value.callerUserId)
+			if callerPlayer then
+				remote:FireClient(callerPlayer, "CallConnected", {
+					partnerUserId = player.UserId,
+					partnerName = player.DisplayName or player.Name,
+				})
+				remote:FireClient(player, "CallConnected", {
+					partnerUserId = callerPlayer.UserId,
+					partnerName = callerPlayer.DisplayName or callerPlayer.Name,
+				})
+			end
+		end
+
+	elseif action == "DeclineCall" or action == "EndCall" then
+		-- value = { partnerUserId = number }
+		if type(value) == "table" and value.partnerUserId then
+			local partnerPlayer = Players:GetPlayerByUserId(value.partnerUserId)
+			if partnerPlayer then
+				remote:FireClient(partnerPlayer, "CallEnded", {
+					endedBy = player.UserId,
+				})
+			end
+		end
+
+	elseif action == "SendSMS" then
+		-- value = { targetUserId = number, targetPhone = string, messageText = string }
+		if type(value) == "table" and value.messageText and value.messageText ~= "" then
+			local targetPhoneStr = cleanPhone(value.targetPhone)
+			local targetPlayer = nil
+			if value.targetUserId then
+				targetPlayer = Players:GetPlayerByUserId(value.targetUserId)
+			end
+			if not targetPlayer and targetPhoneStr ~= "" then
+				targetPlayer = findPlayerByPhoneNum(targetPhoneStr)
+			end
+
+			local senderPhone = getPlayerPhone(player)
+			local now = os.time()
+
+			if targetPlayer and targetPlayer ~= player then
+				remote:FireClient(targetPlayer, "ReceiveSMS", {
+					senderUserId = player.UserId,
+					senderName = player.DisplayName or player.Name,
+					senderPhone = senderPhone,
+					messageText = value.messageText,
+					timestamp = now,
+				})
+				remote:FireClient(player, "SMSSent", {
+					targetUserId = targetPlayer.UserId,
+					targetPhone = getPlayerPhone(targetPlayer),
+					messageText = value.messageText,
+					timestamp = now,
+				})
+			else
+				local displayNum = if value.targetPhone and value.targetPhone ~= "" then value.targetPhone else "Tujuan"
+				remote:FireClient(player, "SMSFailed", {
+					reason = "Nomor telepon '" .. displayNum .. "' tidak terdaftar atau sedang tidak aktif.",
+				})
 			end
 		end
 	end
